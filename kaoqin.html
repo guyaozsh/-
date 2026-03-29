@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金竹林 · 考勤管理 · 旗舰版</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Microsoft YaHei', 'Inter', -apple-system, sans-serif; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* ===== 系统配色方案 ===== */
+        :root {
+            --primary: #1c4b2d;        /* 主绿色 */
+            --primary-light: #2e6d3e;
+            --primary-dark: #123b20;
+            --secondary: #4a627a;       /* 辅助蓝色灰 */
+            --accent: #e9b35f;           /* 强调金色 */
+            --accent-light: #f5d7a0;
+            --success: #2c6b4b;          /* 成功绿 */
+            --warning: #b16f2e;           /* 警告橙 */
+            --danger: #b22222;            /* 危险红 */
+            --info: #3a698b;              /* 信息蓝 */
+            --bg-light: #f5f8fc;          /* 浅灰背景 */
+            --border-light: #e2e8f0;       /* 边框色 */
+            --text-dark: #1e2f3d;
+            --text-soft: #4a5f73;
+            --text-light: #7a8b9f;
+            --card-bg: #ffffff;
+            --hover-bg: #f0f7fc;
+        }
+
+        body { 
+            background: #eef3f9; 
+            margin: 20px; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1450px; 
+            width: 100%; 
+            background: var(--card-bg); 
+            border-radius: 32px;
+            box-shadow: 0 20px 45px -15px rgba(31,63,63,0.5); 
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin: 0 0 20px 0; 
+            font-size: 28px; 
+            border-bottom: 2px solid var(--border-light); 
+            padding-bottom: 18px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+        }
+        h1 i { color: var(--accent); }
+
+        /* ===== 天气面板 ===== */
+        .weather-panel {
+            background: var(--bg-light); 
+            border-radius: 28px; 
+            padding: 20px 30px; 
+            margin-bottom: 24px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 20px;
+            border: 1px solid var(--border-light); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .weather-left { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; }
+        .weather-item { display: flex; align-items: center; gap: 12px; }
+        .weather-icon { font-size: 32px; }
+        .weather-info { display: flex; flex-direction: column; }
+        .weather-label { font-size: 13px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+        .weather-value { font-size: 24px; font-weight: 500; color: var(--text-dark); }
+        .weather-value small { font-size: 14px; color: var(--text-light); margin-left: 6px; }
+        
+        .manager-area {
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            background: white;
+            padding: 8px 22px; 
+            border-radius: 40px; 
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .manager-label { 
+            font-size: 14px; 
+            color: var(--secondary); 
+            font-weight: 500; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+        }
+        .manager-input {
+            border: none; 
+            background: var(--bg-light); 
+            padding: 8px 16px; 
+            border-radius: 30px;
+            font-size: 15px; 
+            width: 140px; 
+            border: 1px solid var(--border-light); 
+            color: var(--text-dark);
+            outline: none;
+            transition: 0.15s;
+        }
+        .manager-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(28,75,45,0.1); }
+        
+        .greeting {
+            background: white; 
+            padding: 12px 28px; 
+            border-radius: 50px; 
+            font-size: 18px;
+            font-weight: 500; 
+            color: var(--text-dark); 
+            border: 1px solid var(--border-light); 
+            min-width: 280px;
+            text-align: center;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.8);
+        }
+        .greeting i { color: var(--accent); margin-right: 8px; }
+
+        /* ===== 日期控制栏 ===== */
+        .date-control {
+            background: var(--bg-light); 
+            border: 1px solid var(--border-light); 
+            padding: 16px 24px;
+            border-radius: 24px; 
+            margin-bottom: 24px; 
+            display: flex; 
+            align-items: center;
+            gap: 30px; 
+            flex-wrap: wrap; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .date-item { display: flex; align-items: center; gap: 12px; }
+        .date-item label { 
+            font-weight: 600; 
+            color: var(--secondary); 
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+        }
+        .date-item input, .date-item select {
+            padding: 10px 16px; 
+            border: 1px solid var(--border-light); 
+            border-radius: 40px;
+            font-size: 15px; 
+            background: white; 
+            color: var(--text-dark);
+            outline: none;
+            transition: 0.15s;
+        }
+        .date-item input:focus, .date-item select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(28,75,45,0.1); }
+        
+        /* ===== 统一按钮样式 ===== */
+        .btn {
+            background: white; 
+            color: var(--text-dark); 
+            border: 1px solid var(--border-light);
+            padding: 10px 24px; 
+            border-radius: 40px; 
+            font-size: 15px; 
+            cursor: pointer;
+            font-weight: 500; 
+            transition: all 0.2s; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+        }
+        .btn:hover { 
+            background: var(--hover-bg); 
+            border-color: var(--primary-light); 
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px -8px rgba(28,75,45,0.3);
+        }
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary-dark); 
+            box-shadow: 0 6px 12px -8px var(--primary);
+        }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { 
+            background: var(--success); 
+            color: white; 
+            border-color: #1d5437;
+        }
+        .btn-success:hover { background: #2e7d5a; }
+        .btn-warning { 
+            background: var(--warning); 
+            color: white; 
+            border-color: #9e5f24;
+        }
+        .btn-warning:hover { background: #c47e3a; }
+        .btn-danger { 
+            background: var(--danger); 
+            color: white; 
+            border-color: #901e1e;
+        }
+        .btn-danger:hover { background: #c72e2e; }
+        .btn-excel { 
+            background: var(--success); 
+            color: white; 
+            border-color: #1d5437;
+        }
+        .btn-excel:hover { background: #2e7d5a; }
+        .btn-sm { padding: 6px 16px; font-size: 14px; }
+
+        /* ===== 员工管理栏 ===== */
+        .employee-bar {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            gap: 15px;
+            background: var(--bg-light);
+            padding: 20px 24px;
+            border-radius: 28px;
+            border: 1px solid var(--border-light);
+        }
+        .add-employee { display: flex; gap: 12px; flex-wrap: wrap; }
+        .add-employee input, .add-employee select {
+            padding: 12px 18px; 
+            border: 1px solid var(--border-light); 
+            border-radius: 40px;
+            font-size: 15px; 
+            background: white; 
+            color: var(--text-dark);
+            outline: none;
+            min-width: 140px;
+        }
+        .add-employee input:focus, .add-employee select:focus { border-color: var(--primary); }
+        
+        /* ===== 统计卡片 ===== */
+        .summary-cards { display: flex; gap: 16px; flex-wrap: wrap; }
+        .card {
+            background: white; 
+            border-radius: 28px; 
+            padding: 16px 26px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02); 
+            border: 1px solid var(--border-light);
+            flex: 1 1 130px; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px;
+            transition: 0.15s;
+        }
+        .card:hover { box-shadow: 0 8px 24px -12px var(--primary); }
+        .card i { font-size: 36px; color: var(--primary); }
+        .card-info { display: flex; flex-direction: column; }
+        .card-title { font-size: 13px; color: var(--text-light); letter-spacing: 0.3px; }
+        .card-value { font-size: 32px; font-weight: 600; color: var(--primary-dark); line-height: 1; }
+
+        /* ===== 批量操作工具栏 ===== */
+        .batch-toolbar {
+            background: linear-gradient(145deg, #f0f9f0, #e3f0ed);
+            border-radius: 28px; 
+            padding: 16px 24px; 
+            margin: 20px 0;
+            display: flex; 
+            flex-wrap: wrap; 
+            align-items: center; 
+            gap: 16px;
+            border: 1px solid #b5d0e6;
+            box-shadow: 0 4px 12px rgba(28,75,45,0.05);
+        }
+        .batch-toolbar .badge {
+            background: var(--primary); 
+            color: white; 
+            padding: 6px 20px; 
+            border-radius: 40px;
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 4px 8px -4px var(--primary);
+        }
+        .batch-stats {
+            color: var(--text-dark); 
+            font-size: 0.95rem; 
+            margin-left: auto;
+            background: rgba(255,255,255,0.6);
+            padding: 5px 15px;
+            border-radius: 40px;
+            border: 1px solid rgba(28,75,45,0.2);
+        }
+
+        /* ===== 表格样式优化 ===== */
+        .table-wrapper {
+            overflow-x: auto; 
+            margin-top: 10px; 
+            border-radius: 28px;
+            border: 1px solid var(--border-light); 
+            max-height: 550px; 
+            overflow-y: auto;
+            background: white; 
+            box-shadow: 0 6px 18px rgba(0,0,0,0.02);
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            min-width: 900px; 
+            background: white; 
+            font-size: 14px;
+        }
+        th {
+            background: #ecf5fd; 
+            color: var(--primary-dark); 
+            font-weight: 600; 
+            padding: 16px 6px;
+            font-size: 14px; 
+            text-align: center; 
+            border-right: 1px solid #dee5ef;
+            border-bottom: 2px solid #c5d5e8; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10;
+            white-space: nowrap;
+        }
+        td { 
+            border: 1px solid #eef2f8; 
+            padding: 12px 4px; 
+            text-align: center; 
+            vertical-align: middle;
+        }
+
+        /* 职位列特殊样式 */
+        .position-col {
+            background: #f7fafd; 
+            color: var(--secondary); 
+            font-weight: 500; 
+            font-size: 14px;
+            position: sticky; 
+            left: 120px;
+            z-index: 14;
+            min-width: 120px;
+            border-right: 2px solid #c5d5e8;
+        }
+        .employee-col {
+            background: #f7fafd; 
+            font-weight: 600; 
+            color: var(--primary-dark);
+            position: sticky; 
+            left: 40px; 
+            z-index: 15;
+            min-width: 110px;
+            border-right: 2px solid #c5d5e8;
+        }
+        .checkbox-col {
+            background: #f7fafd;
+            position: sticky;
+            left: 0;
+            z-index: 16;
+            width: 50px;
+            border-right: 2px solid #c5d5e8;
+        }
+        th.checkbox-col { background: #ecf5fd; }
+        th.employee-col, th.position-col { background: #ecf5fd; z-index: 20; }
+
+        .date-cell { 
+            min-width: 55px; 
+            background-color: #fff; 
+            font-size: 14px; 
+            color: var(--text-soft); 
+        }
+        .weekend { background-color: #f9fbfe !important; color: #9aa9bb; }
+        .today { 
+            background-color: #f0f9ff !important; 
+            border: 2px solid var(--primary) !important; 
+            font-weight: 600;
+            box-shadow: inset 0 0 0 1px white;
+        }
+
+        /* 考勤状态选择器 */
+        .status-select {
+            width: 100%; 
+            border: none; 
+            background: transparent; 
+            text-align: center;
+            font-size: 14px; 
+            padding: 8px 0; 
+            cursor: pointer; 
+            border-radius: 30px;
+            font-weight: 500;
+            transition: 0.1s;
+        }
+        .status-select:hover { background: #f0f5fc; }
+        .status-√ { background: #e3f3e5; color: var(--success); font-weight: 600; border-radius: 30px; }
+        .status-休 { background: #e5f0ff; color: var(--info); font-weight: 600; border-radius: 30px; }
+        .status-事 { background: #fef3e0; color: var(--warning); border-radius: 30px; }
+        .status-病 { background: #f2e4f5; color: #7b5391; border-radius: 30px; }
+        .status-旷 { background: #fce9e9; color: var(--danger); font-weight: 600; border-radius: 30px; }
+
+        /* 分页控件 */
+        .pagination {
+            margin-top: 20px; 
+            display: flex; 
+            gap: 20px; 
+            align-items: center;
+            justify-content: center;
+        }
+        .pagination button { 
+            background: white; 
+            border: 1px solid var(--border-light); 
+            padding: 10px 25px; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            font-weight: 500;
+            transition: 0.15s;
+        }
+        .pagination button:hover:not(:disabled) { 
+            background: var(--hover-bg); 
+            border-color: var(--primary); 
+            transform: translateY(-1px);
+        }
+        .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination span { 
+            font-size: 1rem; 
+            color: var(--secondary); 
+            background: #f0f5fa;
+            padding: 6px 20px;
+            border-radius: 40px;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30,50,60,0.4); 
+            backdrop-filter: blur(8px); 
+            justify-content: center;
+            align-items: center; 
+            z-index: 2000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; 
+            padding: 32px; 
+            border-radius: 48px; 
+            max-width: 520px;
+            width: 90%; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 30px 60px -20px #143b2b;
+        }
+        .modal-content h3 { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            color: var(--primary); 
+            margin-bottom: 24px; 
+            font-size: 1.6rem;
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 12px;
+        }
+        .employee-checkbox { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            padding: 12px 0; 
+            border-bottom: 1px solid var(--border-light); 
+            font-size: 1rem;
+        }
+        .employee-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 16px; margin-top: 28px; }
+
+        /* 提示条 */
+        .toast-message {
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: var(--primary-dark); 
+            color: white; 
+            padding: 14px 30px; 
+            border-radius: 60px;
+            box-shadow: 0 15px 30px -10px var(--primary-dark); 
+            z-index: 9999; 
+            display: none;
+            font-weight: 500; 
+            align-items: center; 
+            gap: 10px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* 报表区域 */
+        .month-report { 
+            background: var(--bg-light); 
+            padding: 28px; 
+            border-radius: 32px; 
+            margin-top: 30px;
+            border: 1px solid var(--border-light); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+        }
+        .month-report table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .month-report th, .month-report td { 
+            padding: 14px; 
+            border: 1px solid #d9e2ef; 
+            text-align: center; 
+        }
+        .month-report th { background: #eef3f9; color: var(--primary-dark); }
+
+        .footer {
+            margin-top: 28px; 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 16px; 
+            border-top: 1px dashed var(--border-light);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1><i class="fas fa-clipboard-list"></i> 水城县金竹林农家乐 · 考勤管理 <span style="font-size: 16px; background: #eef6ff; padding: 4px 15px; border-radius: 40px; color: var(--info);">旗舰版</span></h1>
+
+    <!-- 天气面板 -->
+    <div class="weather-panel">
+        <div class="weather-left">
+            <div class="weather-item"><div class="weather-icon" id="weatherIcon">⛅</div><div class="weather-info"><span class="weather-label">实时天气</span><span class="weather-value" id="weatherDisplay">22° <small>水城 · 多云</small></span></div></div>
+            <div class="weather-item"><div class="weather-icon">📅</div><div class="weather-info"><span class="weather-label">今天日期</span><span class="weather-value" id="todayDateDisplay">2026年3月7日</span></div></div>
+            <div class="weather-item"><div class="weather-icon">⏰</div><div class="weather-info"><span class="weather-label">当前时间</span><span class="weather-value" id="currentTimeDisplay">14:30:22</span></div></div>
+            <div class="manager-area">
+                <span class="manager-label"><i class="fas fa-user-tie" style="color: var(--primary);"></i> 系统管理人</span>
+                <input type="text" class="manager-input" id="managerInput" value="赵老板" maxlength="20">
+            </div>
+        </div>
+        <div class="greeting" id="greetingDisplay"><i class="fas fa-smile"></i> 下午好，赵老板 · 今天也要加油哦！</div>
+    </div>
+
+    <!-- 日期控制栏 -->
+    <div class="date-control">
+        <div class="date-item"><label><i class="fas fa-calendar-alt" style="color: var(--primary);"></i> 选择月份：</label><input type="month" id="monthPicker" value="2026-03"></div>
+        <div class="date-item">
+            <span><i class="fas fa-calendar-week" style="color: var(--info);"></i> 本月总天数：<strong id="totalDays">31</strong>天</span>
+            <span style="color:var(--text-light);">｜每人月休：<strong>2</strong>天</span>
+            <span>｜应出勤：<strong id="shouldWorkDays">29</strong>天</span>
+        </div>
+        <button class="btn" id="refreshTodayBtn"><i class="fas fa-sun" style="color: var(--accent);"></i> 高亮今天</button>
+        <button class="btn btn-excel" id="exportReportBtn"><i class="fas fa-chart-bar"></i> 生成月报表</button>
+        <button class="btn btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> 导出Excel</button>
+    </div>
+
+    <!-- 员工管理栏 -->
+    <div class="employee-bar">
+        <div class="add-employee">
+            <input type="text" id="newEmpName" placeholder="员工姓名" maxlength="20">
+            <select id="newEmpPosition">
+                <option value="服务员">👥 服务员</option>
+                <option value="厨师">🍳 厨师</option>
+                <option value="领班">⭐ 领班</option>
+                <option value="保洁">🧹 保洁</option>
+                <option value="采购">📦 采购</option>
+                <option value="经理">👔 经理</option>
+                <option value="财务">💰 财务</option>
+                <option value="其他">🔧 其他</option>
+            </select>
+            <button class="btn btn-primary" id="addEmpBtn"><i class="fas fa-user-plus"></i> 添加员工</button>
+            <button class="btn btn-warning" id="openResignBtn"><i class="fas fa-user-minus"></i> 离职管理</button>
+        </div>
+        <div class="summary-cards">
+            <div class="card"><i class="fas fa-users"></i><div class="card-info"><span class="card-title">员工总数</span><span class="card-value" id="empCount">0</span></div></div>
+            <div class="card"><i class="fas fa-calendar-check"></i><div class="card-info"><span class="card-title">应出勤</span><span class="card-value" id="totalShould">0</span></div></div>
+            <div class="card"><i class="fas fa-clock"></i><div class="card-info"><span class="card-title">实出勤</span><span class="card-value" id="totalActual">0</span></div></div>
+        </div>
+    </div>
+
+    <!-- 批量操作工具栏 -->
+    <div class="batch-toolbar">
+        <span class="badge"><i class="fas fa-layer-group"></i> 批量操作</span>
+        <button class="btn btn-success" id="batchMarkPresentBtn"><i class="fas fa-check-circle"></i> 批量出勤</button>
+        <button class="btn btn-warning" id="batchMarkLeaveBtn"><i class="fas fa-umbrella-beach"></i> 批量休假</button>
+        <button class="btn btn-danger" id="batchMarkAbsentBtn"><i class="fas fa-exclamation-triangle"></i> 批量旷工</button>
+        <span class="batch-stats"><i class="fas fa-check-square"></i> 已选中 <span id="selectedCount">0</span> 人</span>
+        <button class="btn btn-sm" id="clearSelectionBtn"><i class="fas fa-times"></i> 清除选中</button>
+    </div>
+
+    <!-- 考勤主表 -->
+    <div class="table-wrapper">
+        <table id="attendanceTable">
+            <thead id="tableHeader"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 分页控件 -->
+    <div class="pagination">
+        <button id="prevPage"><i class="fas fa-chevron-left"></i> 上一页</button>
+        <span id="pageInfo">第1页 / 共1页</span>
+        <button id="nextPage">下一页 <i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- 月度报表区域 -->
+    <div id="reportArea" class="month-report" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color:var(--primary);"><i class="fas fa-chart-pie" style="color: var(--accent);"></i> 本月考勤汇总报表</h3>
+            <button class="btn btn-excel" id="exportReportExcelBtn"><i class="fas fa-download"></i> 导出Excel</button>
+        </div>
+        <table>
+            <thead><tr><th>姓名</th><th>应出勤</th><th>实际出勤</th><th>休假</th><th>事假</th><th>病假</th><th>旷工</th></tr></thead>
+            <tbody id="reportBody"></tbody>
+        </table>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn" id="closeReportBtn"><i class="fas fa-times"></i> 关闭报表</button>
+        </div>
+    </div>
+
+    <!-- 离职管理模态框 -->
+    <div id="resignModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-user-minus" style="color: var(--danger);"></i> 选择离职员工</h3>
+            <div id="employeeCheckboxList"></div>
+            <div class="modal-buttons">
+                <button class="btn" id="closeResignModal"><i class="fas fa-times"></i> 取消</button>
+                <button class="btn btn-danger" id="deleteSelectedBtn"><i class="fas fa-trash-alt"></i> 确认删除所选</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作 -->
+    <div class="footer">
+        <button class="btn btn-danger" id="resetAllBtn"><i class="fas fa-redo-alt"></i> 重置所有数据</button>
+        <button class="btn btn-primary" id="saveBtn"><i class="fas fa-save"></i> 保存当前数据</button>
+    </div>
+</div>
+
+<!-- 提示条 -->
+<div class="toast-message" id="toast">
+    <i class="fas fa-check-circle"></i> <span></span>
+</div>
+
+<script>
+(function() {
+    // ---------- 全局数据 ----------
+    let employees = [];               // { name, position }
+    let attendanceData = {};          // "员工名_年月日": "状态"
+    let currentMonth = '2026-03';
+    let todayStr = getTodayDateString();
+    let currentManager = '赵老板';
+
+    // 分页
+    let currentPage = 1;
+    const pageSize = 10;
+
+    // 当前选中的员工
+    let selectedEmployeeNames = new Set();
+
+    // 问候语短语
+    const cheerPhrases = [
+        '今天也要加油哦！','认真记录每一天～','金竹林欢迎您！','工作顺利，心情愉快！',
+        '考勤准确，管理轻松。','又是元气满满的一天！','注意休息，别太累。','大家一起努力！',
+        '保持微笑，服务周到。','农家乐生意兴隆！'
+    ];
+
+    // ---------- 工具函数 ----------
+    function getTodayDateString() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function showToast(msg, type = 'success') {
+        const toast = document.getElementById('toast');
+        const icon = toast.querySelector('i');
+        const span = toast.querySelector('span');
+        span.innerText = msg;
+        icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+        toast.style.background = type === 'success' ? '#1c4b2d' : '#b22222';
+        toast.style.display = 'flex';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').innerText = selectedEmployeeNames.size;
+    }
+
+    function clearSelection() {
+        selectedEmployeeNames.clear();
+        document.querySelectorAll('.emp-checkbox').forEach(cb => cb.checked = false);
+        updateSelectedCount();
+    }
+
+    // 保存/加载数据
+    function saveToLocal() {
+        const data = { employees, attendanceData };
+        localStorage.setItem('jinzhulin_attendance_v5_pro', JSON.stringify(data));
+        showToast('数据已保存');
+    }
+
+    function loadFromLocal() {
+        const saved = localStorage.getItem('jinzhulin_attendance_v5_pro');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (Array.isArray(data.employees)) {
+                    if (data.employees.length > 0 && typeof data.employees[0] === 'string') {
+                        employees = data.employees.map(name => ({ name, position: '服务员' }));
+                    } else {
+                        employees = data.employees;
+                    }
+                }
+                attendanceData = data.attendanceData || {};
+            } catch (e) {}
+        } else {
+            // 默认示例数据（丰富职位）
+            employees = [
+                { name: '张翠花', position: '服务员' },
+                { name: '李老四', position: '厨师' },
+                { name: '王老三', position: '领班' },
+                { name: '赵小妹', position: '保洁' },
+                { name: '孙大厨', position: '厨师' },
+                { name: '周经理', position: '经理' },
+                { name: '吴会计', position: '财务' },
+                { name: '郑采购', position: '采购' }
+            ];
+        }
+    }
+
+    // ---------- 天气/时间更新 ----------
+    function updateWeatherAndTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2,'0');
+        const day = String(now.getDate()).padStart(2,'0');
+        const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+        const weekday = weekdays[now.getDay()];
+        document.getElementById('todayDateDisplay').innerText = `${year}年${month}月${day}日 ${weekday}`;
+        document.getElementById('currentTimeDisplay').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+        const manager = document.getElementById('managerInput').value.trim() || '管理员';
+        currentManager = manager;
+        const hour = now.getHours();
+        let period = '';
+        if (hour < 6) period = '凌晨';
+        else if (hour < 11) period = '早上';
+        else if (hour < 14) period = '中午';
+        else if (hour < 18) period = '下午';
+        else if (hour < 22) period = '晚上';
+        else period = '深夜';
+        const phraseIndex = (hour + day) % cheerPhrases.length;
+        const phrase = cheerPhrases[phraseIndex];
+        document.getElementById('greetingDisplay').innerHTML = `<i class="fas fa-smile" style="color: var(--accent);"></i> ${period}好，${manager} · ${phrase}`;
+        // 模拟天气
+        const monthNum = now.getMonth() + 1;
+        let weatherIcon = '☀️', weatherDesc = '晴';
+        if (monthNum >= 3 && monthNum <= 5) { weatherIcon = '⛅'; weatherDesc = '多云'; }
+        else if (monthNum >= 6 && monthNum <= 8) { weatherIcon = '🌧️'; weatherDesc = '阵雨'; }
+        else if (monthNum >= 9 && monthNum <= 11) { weatherIcon = '☁️'; weatherDesc = '阴'; }
+        else { weatherIcon = '❄️'; weatherDesc = '寒冷'; }
+        const temp = Math.floor(Math.random() * 10) + 12;
+        document.getElementById('weatherIcon').innerText = weatherIcon;
+        document.getElementById('weatherDisplay').innerHTML = `${temp}° <small>水城 · ${weatherDesc}</small>`;
+    }
+    setInterval(updateWeatherAndTime, 1000);
+
+    // ---------- 批量操作函数 ----------
+    function batchUpdateStatusForSelected(status) {
+        if (selectedEmployeeNames.size === 0) {
+            alert('请先勾选要操作的员工');
+            return;
+        }
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        
+        const day = prompt(`请输入要设置的日期 (1-${totalDays})，留空则为全部日期`, '');
+        if (day === null) return;
+        
+        const days = day.trim() === '' ? [] : day.split(',').map(d => parseInt(d.trim())).filter(d => d >= 1 && d <= totalDays);
+        
+        selectedEmployeeNames.forEach(empName => {
+            const emp = employees.find(e => e.name === empName);
+            if (!emp) return;
+            
+            if (days.length > 0) {
+                days.forEach(d => {
+                    const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const fullKey = `${empName}_${dateStr}`;
+                    attendanceData[fullKey] = status;
+                });
+            } else {
+                for (let d = 1; d <= totalDays; d++) {
+                    const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    const fullKey = `${empName}_${dateStr}`;
+                    attendanceData[fullKey] = status;
+                }
+            }
+        });
+        
+        saveToLocal();
+        renderTable();
+        showToast(`已批量更新 ${selectedEmployeeNames.size} 位员工的考勤状态`);
+    }
+
+    document.getElementById('batchMarkPresentBtn').addEventListener('click', () => batchUpdateStatusForSelected('√'));
+    document.getElementById('batchMarkLeaveBtn').addEventListener('click', () => batchUpdateStatusForSelected('休'));
+    document.getElementById('batchMarkAbsentBtn').addEventListener('click', () => batchUpdateStatusForSelected('旷'));
+    document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+        clearSelection();
+        renderTable();
+    });
+
+    // ---------- 渲染表格 ----------
+    function renderTable() {
+        const month = document.getElementById('monthPicker').value;
+        if (month) currentMonth = month;
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        document.getElementById('totalDays').innerText = totalDays;
+        document.getElementById('shouldWorkDays').innerText = totalDays - 2;
+
+        // 表头
+        let headerHtml = '<tr>';
+        headerHtml += '<th class="checkbox-col"><i class="fas fa-check-square"></i></th>';
+        headerHtml += '<th class="employee-col">员工</th>';
+        headerHtml += '<th class="position-col">职位</th>';
+        for (let d = 1; d <= totalDays; d++) {
+            const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const weekDay = new Date(year, monthNum-1, d).getDay();
+            const isWeekend = (weekDay === 0 || weekDay === 6);
+            const isToday = (dateStr === todayStr);
+            let className = 'date-cell';
+            if (isWeekend) className += ' weekend';
+            if (isToday) className += ' today';
+            headerHtml += `<th class="${className}">${d}</th>`;
+        }
+        headerHtml += '<th>操作</th></tr>';
+        document.getElementById('tableHeader').innerHTML = headerHtml;
+
+        // 计算分页
+        const totalPages = Math.ceil(employees.length / pageSize);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+        const start = (currentPage - 1) * pageSize;
+        const end = Math.min(start + pageSize, employees.length);
+        const pageEmployees = employees.slice(start, end);
+
+        let bodyHtml = '';
+        pageEmployees.forEach(emp => {
+            const isSelected = selectedEmployeeNames.has(emp.name);
+            bodyHtml += '<tr>';
+            bodyHtml += `<td class="checkbox-col"><input type="checkbox" class="emp-checkbox" data-name="${emp.name}" ${isSelected ? 'checked' : ''} onchange="window.handleEmpCheckbox(this)"></td>`;
+            bodyHtml += `<td class="employee-col">${emp.name}</td>`;
+            bodyHtml += `<td class="position-col">${emp.position}</td>`;
+            for (let d = 1; d <= totalDays; d++) {
+                const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const fullKey = `${emp.name}_${dateStr}`;
+                const status = attendanceData[fullKey] || '';
+                const weekDay = new Date(year, monthNum-1, d).getDay();
+                const isWeekend = (weekDay === 0 || weekDay === 6);
+                const isToday = (dateStr === todayStr);
+                let tdClass = 'date-cell';
+                if (isWeekend) tdClass += ' weekend';
+                if (isToday) tdClass += ' today';
+                let statusClass = '';
+                if (status === '√') statusClass = 'status-√';
+                else if (status === '休') statusClass = 'status-休';
+                else if (status === '事') statusClass = 'status-事';
+                else if (status === '病') statusClass = 'status-病';
+                else if (status === '旷') statusClass = 'status-旷';
+                bodyHtml += `<td class="${tdClass}">`;
+                bodyHtml += `<select class="status-select ${statusClass}" data-emp="${emp.name}" data-date="${dateStr}">`;
+                bodyHtml += `<option value="" ${status===''?'selected':''}>-</option>`;
+                bodyHtml += `<option value="√" ${status==='√'?'selected':''}>√ 出勤</option>`;
+                bodyHtml += `<option value="休" ${status==='休'?'selected':''}>休 休假</option>`;
+                bodyHtml += `<option value="事" ${status==='事'?'selected':''}>事 事假</option>`;
+                bodyHtml += `<option value="病" ${status==='病'?'selected':''}>病 病假</option>`;
+                bodyHtml += `<option value="旷" ${status==='旷'?'selected':''}>旷 旷工</option>`;
+                bodyHtml += `</select></td>`;
+            }
+            bodyHtml += `<td><button class="btn btn-sm detail-btn" data-name="${emp.name}"><i class="fas fa-info-circle"></i> 明细</button></td>`;
+            bodyHtml += '</tr>';
+        });
+        document.getElementById('tableBody').innerHTML = bodyHtml;
+        document.getElementById('empCount').innerText = employees.length;
+
+        // 分页信息
+        document.getElementById('pageInfo').innerText = `第${currentPage}页 / 共${totalPages}页`;
+        document.getElementById('prevPage').disabled = currentPage <= 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+        // 绑定考勤变更事件
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', function() {
+                const empName = this.dataset.emp;
+                const dateStr = this.dataset.date;
+                const value = this.value;
+                const fullKey = `${empName}_${dateStr}`;
+                if (value === '') delete attendanceData[fullKey];
+                else attendanceData[fullKey] = value;
+                updateSummaryCards();
+                saveToLocal();
+            });
+        });
+
+        // 明细按钮
+        document.querySelectorAll('.detail-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const empName = this.dataset.name;
+                viewEmployeeDetail(empName);
+            });
+        });
+
+        updateSummaryCards();
+    }
+
+    window.handleEmpCheckbox = function(checkbox) {
+        const empName = checkbox.dataset.name;
+        if (checkbox.checked) {
+            selectedEmployeeNames.add(empName);
+        } else {
+            selectedEmployeeNames.delete(empName);
+        }
+        updateSelectedCount();
+    };
+
+    function updateSummaryCards() {
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        const totalShould = employees.length * (totalDays - 2);
+        let totalActual = 0;
+        employees.forEach(emp => {
+            for (let d = 1; d <= totalDays; d++) {
+                const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const fullKey = `${emp.name}_${dateStr}`;
+                const status = attendanceData[fullKey];
+                if (status === '√' || status === '休') totalActual++;
+            }
+        });
+        document.getElementById('totalShould').innerText = totalShould;
+        document.getElementById('totalActual').innerText = totalActual;
+    }
+
+    function viewEmployeeDetail(empName) {
+        const emp = employees.find(e => e.name === empName);
+        const position = emp ? emp.position : '未知';
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        let actual = 0, xiu = 0, shi = 0, bing = 0, kuang = 0;
+        for (let d = 1; d <= totalDays; d++) {
+            const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const fullKey = `${empName}_${dateStr}`;
+            const status = attendanceData[fullKey];
+            if (status === '√') actual++;
+            else if (status === '休') { actual++; xiu++; }
+            else if (status === '事') shi++;
+            else if (status === '病') bing++;
+            else if (status === '旷') kuang++;
+        }
+        alert(`${empName} (${position})\n\n实际出勤(含休假): ${actual}天\n其中休假: ${xiu}天\n事假: ${shi}天\n病假: ${bing}天\n旷工: ${kuang}天`);
+    }
+
+    function addEmployee() {
+        const nameInput = document.getElementById('newEmpName');
+        const positionSelect = document.getElementById('newEmpPosition');
+        const name = nameInput.value.trim();
+        const position = positionSelect.value;
+        if (!name) { alert('请输入员工姓名'); return; }
+        if (employees.some(e => e.name === name)) { alert('员工已存在'); return; }
+        employees.push({ name, position });
+        nameInput.value = '';
+        currentPage = 1;
+        renderTable();
+        saveToLocal();
+        showToast('员工已添加');
+    }
+
+    function openResignModal() {
+        const listDiv = document.getElementById('employeeCheckboxList');
+        if (employees.length === 0) { listDiv.innerHTML = '<p style="color:#7f8fa2;">暂无员工</p>'; }
+        else {
+            let html = '';
+            employees.forEach(emp => {
+                html += `<div class="employee-checkbox"><input type="checkbox" value="${emp.name}" id="chk_${emp.name}"><label for="chk_${emp.name}"><strong>${emp.name}</strong> (${emp.position})</label></div>`;
+            });
+            listDiv.innerHTML = html;
+        }
+        document.getElementById('resignModal').classList.add('active');
+    }
+
+    function closeResignModal() { document.getElementById('resignModal').classList.remove('active'); }
+
+    function deleteSelectedEmployees() {
+        const checkboxes = document.querySelectorAll('#employeeCheckboxList input[type=checkbox]:checked');
+        if (checkboxes.length === 0) { alert('请至少选择一位员工'); return; }
+        if (!confirm(`确定删除选中的 ${checkboxes.length} 位员工吗？`)) return;
+        const selectedNames = Array.from(checkboxes).map(cb => cb.value);
+        employees = employees.filter(emp => !selectedNames.includes(emp.name));
+        for (let key in attendanceData) {
+            const prefix = key.split('_')[0];
+            if (selectedNames.includes(prefix)) delete attendanceData[key];
+        }
+        selectedNames.forEach(name => selectedEmployeeNames.delete(name));
+        currentPage = 1;
+        renderTable();
+        saveToLocal();
+        closeResignModal();
+        showToast('员工已删除');
+    }
+
+    function resetAllData() {
+        if (confirm('确认重置所有员工和考勤数据吗？不可恢复。')) {
+            employees = [];
+            attendanceData = {};
+            selectedEmployeeNames.clear();
+            currentPage = 1;
+            renderTable();
+            saveToLocal();
+        }
+    }
+
+    function exportReport() {
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        const reportBody = document.getElementById('reportBody');
+        let html = '';
+        employees.forEach(emp => {
+            let actual = 0, xiu = 0, shi = 0, bing = 0, kuang = 0;
+            for (let d = 1; d <= totalDays; d++) {
+                const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const status = attendanceData[`${emp.name}_${dateStr}`];
+                if (status === '√') actual++;
+                else if (status === '休') { actual++; xiu++; }
+                else if (status === '事') shi++;
+                else if (status === '病') bing++;
+                else if (status === '旷') kuang++;
+            }
+            html += `<tr><td>${emp.name}</td><td>${totalDays-2}</td><td>${actual}</td><td>${xiu}</td><td>${shi}</td><td>${bing}</td><td>${kuang}</td></tr>`;
+        });
+        reportBody.innerHTML = html;
+        document.getElementById('reportArea').style.display = 'block';
+    }
+
+    function exportToExcel() {
+        const [year, monthNum] = currentMonth.split('-').map(Number);
+        const totalDays = new Date(year, monthNum, 0).getDate();
+        let csv = "姓名,应出勤,实际出勤,休假,事假,病假,旷工\n";
+        employees.forEach(emp => {
+            let actual = 0, xiu = 0, shi = 0, bing = 0, kuang = 0;
+            for (let d = 1; d <= totalDays; d++) {
+                const dateStr = `${year}-${String(monthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const status = attendanceData[`${emp.name}_${dateStr}`];
+                if (status === '√') actual++;
+                else if (status === '休') { actual++; xiu++; }
+                else if (status === '事') shi++;
+                else if (status === '病') bing++;
+                else if (status === '旷') kuang++;
+            }
+            csv += `${emp.name},${totalDays-2},${actual},${xiu},${shi},${bing},${kuang}\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `考勤报表_${currentMonth}.csv`;
+        link.click();
+    }
+
+    // 事件绑定
+    document.getElementById('refreshTodayBtn').addEventListener('click', () => { todayStr = getTodayDateString(); renderTable(); });
+    document.getElementById('exportReportBtn').addEventListener('click', exportReport);
+    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+    document.getElementById('exportReportExcelBtn').addEventListener('click', exportToExcel);
+    document.getElementById('closeReportBtn').addEventListener('click', () => { document.getElementById('reportArea').style.display = 'none'; });
+    document.getElementById('addEmpBtn').addEventListener('click', addEmployee);
+    document.getElementById('openResignBtn').addEventListener('click', openResignModal);
+    document.getElementById('closeResignModal').addEventListener('click', closeResignModal);
+    document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedEmployees);
+    document.getElementById('resetAllBtn').addEventListener('click', resetAllData);
+    document.getElementById('saveBtn').addEventListener('click', saveToLocal);
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; renderTable(); }
+    });
+    document.getElementById('nextPage').addEventListener('click', () => {
+        const totalPages = Math.ceil(employees.length / pageSize);
+        if (currentPage < totalPages) { currentPage++; renderTable(); }
+    });
+
+    document.getElementById('monthPicker').addEventListener('change', function() {
+        currentMonth = this.value;
+        clearSelection();
+        renderTable();
+    });
+
+    // 初始化
+    loadFromLocal();
+    renderTable();
+    updateWeatherAndTime();
+    updateSelectedCount();
+})();
+</script>
+</body>
+</html>

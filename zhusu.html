@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金竹林 · 雅致房务管理（专业版）</title>
+    <!-- 使用 Font Awesome 图标库提升界面美观度 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+        body { background: #e7eef5; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .app-container {
+            max-width: 1600px; width: 100%; background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); border-radius: 48px; box-shadow: 0 30px 60px rgba(25,60,50,0.25);
+            padding: 28px 34px; border: 1px solid rgba(255,255,255,0.6);
+        }
+        
+        /* 头部样式 */
+        .header {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px dashed #c9daea;
+        }
+        .header h1 {
+            color: #1f3b2c; font-weight: 600; font-size: 2rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .header h1 i { color: #4a8b6b; }
+        .role-bar {
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); border-radius: 60px;
+            padding: 6px 20px 6px 12px; display: flex; align-items: center; gap: 15px;
+            border: 1px solid #ffffff; box-shadow: 0 8px 16px -8px rgba(30,70,50,0.1);
+        }
+        .role-selector {
+            padding: 8px 20px; border-radius: 40px; border: 1px solid #b6cdde;
+            background: white; font-weight: 500; color: #1c3b2a; outline: none; cursor: pointer;
+        }
+        .login-lock { display: flex; align-items: center; gap: 6px; background: #f0f5fa; padding: 4px 12px; border-radius: 40px; font-size: 0.9rem; color: #2c5775; }
+        
+        /* 图例 */
+        .legend {
+            display: flex; gap: 20px; flex-wrap: wrap; background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(4px); padding: 12px 20px; border-radius: 40px; margin: 10px 0 20px;
+            border: 1px solid rgba(200,220,240,0.8);
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-weight: 500; color: #1e3e3a; }
+        .color-dot { width: 20px; height: 20px; border-radius: 6px; }
+        .dot-green { background: #c8f0c1; border-left: 5px solid #2e7d32; }
+        .dot-blue { background: #c9e5ff; border-left: 5px solid #1565c0; }
+        .dot-red { background: #ffcdcd; border-left: 5px solid #c62828; }
+        .dot-orange { background: #ffddb0; border-left: 5px solid #ef6c00; }
+        .dot-gray { background: #e3e9f0; border-left: 5px solid #546e7a; }
+        .dot-group { background: conic-gradient(#f29b9b, #f5d371, #93d9b1, #79b0e0, #f29b9b); border-left: 5px solid #a34f9e; }
+
+        /* 双列布局 */
+        .main-panel { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; }
+        
+        /* 左侧房间网格 */
+        .room-grid { display: flex; flex-direction: column; gap: 20px; max-height: 70vh; overflow-y: auto; padding-right: 5px; }
+        .room-grid::-webkit-scrollbar { width: 6px; }
+        .room-grid::-webkit-scrollbar-track { background: #f0f7fd; border-radius: 10px; }
+        .room-grid::-webkit-scrollbar-thumb { background: #b6cfdf; border-radius: 10px; }
+        
+        .floor-group {
+            background: rgba(255,255,255,0.5); backdrop-filter: blur(4px); border-radius: 28px;
+            padding: 16px 20px; border: 1px solid rgba(255,255,255,0.8);
+        }
+        .floor-title {
+            font-size: 1.3rem; font-weight: 600; color: #1d4e32; margin: 0 0 12px 6px;
+            border-left: 8px solid #246b45; padding-left: 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .floor-title i { color: #4a8b6b; font-size: 1.2rem; }
+        .room-cards { display: flex; flex-wrap: wrap; gap: 14px; }
+        
+        .room-card {
+            width: 170px; background: white; border-radius: 20px; padding: 14px 10px 12px 12px;
+            box-shadow: 0 5px 12px -8px rgba(30,50,70,0.2); border: 1px solid #e5eef8;
+            position: relative; transition: all 0.15s; cursor: pointer;
+        }
+        .room-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px -8px #2d5e5e80; }
+        .room-card.selected { border: 2px solid #1c4b2d; background: #f0f9f0; }
+        .room-card[data-status="available"] { border-left: 6px solid #2d8745; }
+        .room-card[data-status="booked"] { border-left: 6px solid #2b6cbc; }
+        .room-card[data-status="occupied"] { border-left: 6px solid #c13b3b; }
+        .room-card[data-status="dirty"] { border-left: 6px solid #d45f00; }
+        .room-card[data-status="maintenance"] { border-left: 6px solid #4e6279; }
+        
+        .room-checkbox {
+            position: absolute; top: 10px; left: 10px; width: 18px; height: 18px;
+            cursor: pointer; z-index: 10; accent-color: #1c4b2d;
+        }
+        .room-number { font-weight: 700; font-size: 1.3rem; color: #1c3e5c; margin-left: 22px; }
+        .room-type { font-size: 0.8rem; color: #446d8e; margin-left: 22px; }
+        .status-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem;
+            font-weight: 700; margin-left: 22px; margin-top: 6px;
+        }
+        .badge-green { background: #c5f0cf; color: #166b32; }
+        .badge-blue { background: #c9e2ff; color: #104d92; }
+        .badge-red { background: #ffcece; color: #9f2b2b; }
+        .badge-orange { background: #ffe1ba; color: #a34100; }
+        .badge-gray { background: #dde3ec; color: #2d445b; }
+        .group-tag {
+            position: absolute; top: 10px; right: 10px; width: 12px; height: 12px;
+            border-radius: 10px; border: 1px solid white; box-shadow: 0 2px 4px black;
+        }
+        .room-actions { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+        .btn-sm {
+            background: white; border: 1px solid #c2d6ea; border-radius: 30px;
+            padding: 4px 0; font-size: 0.7rem; font-weight: 600; cursor: pointer;
+            transition: 0.1s;
+        }
+        .btn-sm:hover { background: #f0f7fc; }
+        .btn-sm i { margin-right: 3px; font-size: 0.65rem; }
+
+        /* 右侧面板 */
+        .right-panel {
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(16px); border-radius: 38px;
+            padding: 20px; border: 1px solid rgba(255,255,255,0.8); max-height: 70vh; overflow-y: auto;
+        }
+        .right-panel h3 { color: #14462e; font-weight: 600; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .right-panel h3 i { color: #4a8b6b; }
+        
+        .form-group { margin: 12px 0; }
+        .form-group label { font-weight: 600; color: #23543a; margin-bottom: 4px; display: block; font-size: 0.9rem; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px 16px; border: 1px solid #e0ecfb; border-radius: 50px;
+            background: white; font-size: 0.95rem; transition: 0.1s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #1c4b2d; outline: none; box-shadow: 0 0 0 3px rgba(28,75,45,0.2); }
+        
+        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
+        .btn {
+            padding: 10px 16px; border-radius: 40px; border: 1px solid #cbdeef; background: white;
+            font-weight: 600; cursor: pointer; flex: 1 0 auto; transition: 0.1s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-primary { background: #1c4b2d; color: white; border-color: #0e3b23; }
+        .btn-primary:hover { background: #256f3f; }
+        .btn-success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .btn-success:hover { background: #c3e6cb; }
+        .btn-warning { background: #fff3cd; border-color: #ffe69c; color: #856404; }
+        .btn-warning:hover { background: #ffe69c; }
+        .btn-danger { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .btn-danger:hover { background: #f5c6cb; }
+        .btn:disabled { opacity: 0.3; pointer-events: none; }
+
+        /* 批量操作栏 */
+        .batch-toolbar {
+            background: #e3f0ed; border-radius: 30px; padding: 15px; margin: 15px 0;
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+        }
+        .batch-toolbar .badge {
+            background: #1c4b2d; color: white; padding: 3px 10px; border-radius: 30px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+
+        /* 自定义订单面板 */
+        .order-panel {
+            background: #f0f7fc; border-radius: 30px; padding: 15px; margin: 15px 0;
+            border: 1px solid #b5d0e6;
+        }
+        .order-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .order-header h4 { color: #1c5a41; font-size: 1.1rem; display: flex; align-items: center; gap: 6px; }
+        .order-list {
+            max-height: 250px; overflow-y: auto; margin-bottom: 10px;
+            border-radius: 16px; background: white; padding: 5px;
+        }
+        .order-item {
+            background: white; border-radius: 16px; padding: 10px 12px; margin-bottom: 6px;
+            border: 1px solid #e2eefc; display: flex; align-items: center; gap: 8px;
+            transition: 0.1s;
+        }
+        .order-item:hover { background: #f5faff; }
+        .order-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #1c4b2d; }
+        .order-info { flex: 1; font-size: 0.85rem; }
+        .order-info .guest-name { font-weight: 600; color: #1f4b2e; }
+        .order-info .order-dates { color: #4a6f8a; font-size: 0.75rem; margin-top: 2px; }
+        .order-actions { display: flex; gap: 4px; }
+        .order-actions button {
+            background: none; border: 1px solid #c6d9ee; border-radius: 30px;
+            padding: 3px 8px; font-size: 0.7rem; cursor: pointer;
+        }
+        .order-actions button:hover { background: #e5f0ff; }
+
+        /* 团体登记区块 */
+        .group-section {
+            background: #e3f0ed; border-radius: 30px; padding: 18px; margin: 20px 0;
+        }
+        .group-check-grid {
+            display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto;
+            background: white; padding: 12px; border-radius: 24px; margin: 12px 0;
+        }
+        .group-check-item {
+            background: #f5faff; padding: 4px 12px; border-radius: 40px;
+            border: 1px solid #9bb8da; display: flex; align-items: center; gap: 4px;
+        }
+
+        /* 入住记录表格 */
+        .records-table {
+            width: 100%; border-collapse: collapse; margin: 15px 0;
+            background: rgba(255,255,255,0.5); border-radius: 20px; overflow: hidden;
+        }
+        .records-table td {
+            padding: 8px 10px; border-bottom: 1px solid #e2eefc;
+        }
+        .records-table tr:last-child td { border-bottom: none; }
+
+        /* 配置区域 */
+        .config-section {
+            margin-top: 20px; border-top: 2px dashed #abc0d0; padding-top: 20px;
+        }
+        .config-table {
+            width: 100%; border-collapse: collapse; background: white; border-radius: 16px;
+            overflow: hidden; margin: 10px 0;
+        }
+        .config-table th { background: #c7ddee; padding: 8px; }
+        .config-table td { background: #f8fcff; padding: 8px; }
+        .config-table input, .config-table select {
+            width: 100%; padding: 6px 10px; border-radius: 30px; border: 1px solid #b6cfec;
+        }
+
+        /* 提示条 */
+        .toast-message {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #1c4b2d; color: white; padding: 12px 24px; border-radius: 60px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 9999; display: none;
+            font-weight: 500;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30,50,60,0.4); backdrop-filter: blur(8px);
+            justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; border-radius: 36px; max-width: 450px; width: 90%;
+            padding: 30px; box-shadow: 0 30px 60px -20px #1a3a4f;
+        }
+        .modal-content h3 { font-size: 1.6rem; font-weight: 500; color: #1f4b2e; margin-bottom: 20px; border-bottom: 2px solid #deecf9; padding-bottom: 10px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+        .footer {
+            margin-top: 25px; color: #4f6f89; text-align: right; border-top: 1px dashed #b3cfdf;
+            padding-top: 15px; display: flex; justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 头部 -->
+    <div class="header">
+        <h1><i class="fas fa-hotel"></i> 金竹林 · 雅致房务管理 <span style="font-size: 0.9rem; background: #eef6ff; padding: 4px 15px; border-radius: 30px; color: #3a698b;">专业版</span></h1>
+        <div class="role-bar">
+            <span class="login-lock"><i class="fas fa-lock"></i> 权限</span>
+            <select id="roleSelect" class="role-selector">
+                <option value="admin">管理员</option>
+                <option value="frontdesk" selected>前台</option>
+                <option value="housekeeping">保洁</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 图例 -->
+    <div class="legend">
+        <div class="legend-item"><span class="color-dot dot-green"></span> 空闲</div>
+        <div class="legend-item"><span class="color-dot dot-blue"></span> 预订</div>
+        <div class="legend-item"><span class="color-dot dot-red"></span> 入住</div>
+        <div class="legend-item"><span class="color-dot dot-orange"></span> 脏房</div>
+        <div class="legend-item"><span class="color-dot dot-gray"></span> 维修</div>
+        <div class="legend-item"><span class="color-dot dot-group"></span> 团体标记</div>
+        <div class="legend-item"><i class="fas fa-check-circle" style="color:#1c4b2d;"></i> 勾选=批量操作</div>
+    </div>
+
+    <div class="main-panel">
+        <!-- 左侧房间网格 -->
+        <div class="room-grid" id="roomGrid"></div>
+
+        <!-- 右侧操作面板 -->
+        <div class="right-panel">
+            <h3><i class="fas fa-sign-in-alt"></i> 快速入住登记</h3>
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> 客人姓名</label>
+                <input type="text" id="guestName" placeholder="输入姓名">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> 联系电话</label>
+                <input type="tel" id="guestPhone" placeholder="手机号码">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-door-open"></i> 选择房间</label>
+                <select id="roomSelect"></select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-id-card"></i> 房卡号 (可选)</label>
+                <input type="text" id="cardNumber" placeholder="如 C102">
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="checkinBtn" disabled><i class="fas fa-check"></i> 办理入住</button>
+                <button class="btn btn-warning" id="checkoutBtn" disabled><i class="fas fa-sign-out-alt"></i> 退房</button>
+                <button class="btn" id="resetRoomsBtn" disabled><i class="fas fa-redo-alt"></i> 重置默认</button>
+            </div>
+
+            <!-- 批量操作栏 -->
+            <div class="batch-toolbar">
+                <span class="badge"><i class="fas fa-layer-group"></i> 批量操作</span>
+                <button class="btn btn-success" id="batchCheckinBtn" disabled><i class="fas fa-users"></i> 批量入住</button>
+                <button class="btn btn-warning" id="batchCheckoutBtn" disabled><i class="fas fa-user-slash"></i> 批量退房</button>
+                <button class="btn btn-sm" id="clearRoomSelection"><i class="fas fa-times"></i> 取消全选</button>
+            </div>
+
+            <!-- 自定义订单面板 -->
+            <div class="order-panel">
+                <div class="order-header">
+                    <h4><i class="fas fa-tasks"></i> 待分配订单</h4>
+                    <button class="btn btn-sm btn-primary" id="addOrderBtn"><i class="fas fa-plus"></i> 新建</button>
+                </div>
+                <div class="order-list" id="orderListContainer"></div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-sm btn-success" id="assignOrdersBtn"><i class="fas fa-check-double"></i> 分配选中</button>
+                    <button class="btn btn-sm" id="refreshOrdersBtn"><i class="fas fa-sync-alt"></i> 刷新</button>
+                </div>
+                <p style="font-size:0.7rem; margin-top:6px; color:#6b88a5;"><i class="fas fa-info-circle"></i> 勾选订单+勾选房间，点击分配</p>
+            </div>
+
+            <!-- 团体登记 -->
+            <div class="group-section">
+                <h4 style="display:flex; align-items:center; gap:6px;"><i class="fas fa-users"></i> 团体标记</h4>
+                <div id="groupCheckContainer" class="group-check-grid"></div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input type="text" id="groupNameInput" placeholder="团体名称" style="flex:2; padding:8px 15px; border-radius:40px; border:1px solid #aac6dd;">
+                    <select id="groupColorSelect" style="flex:1; padding:8px; border-radius:40px;">
+                        <option value="#E16A6A">红团</option>
+                        <option value="#F0B27A">橙团</option>
+                        <option value="#F7DC6F">黄团</option>
+                        <option value="#7DCEA0">绿团</option>
+                        <option value="#6AA9D9">蓝团</option>
+                        <option value="#B48CD9">紫团</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <button class="btn btn-sm btn-primary" id="applyGroupBtn"><i class="fas fa-tag"></i> 标记</button>
+                    <button class="btn btn-sm" id="clearGroupBtn"><i class="fas fa-eraser"></i> 清除所选</button>
+                </div>
+            </div>
+
+            <div class="note" id="roleNote" style="background:#fff2e2; padding:8px 15px; border-radius:30px; margin:15px 0; font-size:0.9rem;">
+                <i class="fas fa-info-circle"></i> 当前角色：前台
+            </div>
+
+            <h3><i class="fas fa-list-alt"></i> 当前入住记录</h3>
+            <table class="records-table">
+                <tbody id="recordBody">
+                    <tr><td colspan="3" style="text-align:center; color:#888;">暂无入住记录</td></tr>
+                </tbody>
+            </table>
+
+            <!-- 配置区（仅管理员） -->
+            <div id="configSection" class="config-section" style="display: none;">
+                <h3><i class="fas fa-cog"></i> 房间配置 (管理员)</h3>
+                <table class="config-table">
+                    <thead><tr><th>房号</th><th>楼层</th><th>类型</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody id="configBody"></tbody>
+                </table>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin:15px 0;">
+                    <input type="text" id="newRoomNumber" placeholder="新房间号" style="width:90px;">
+                    <select id="newRoomFloor"><option value="1楼">1楼</option><option value="2楼">2楼</option><option value="3楼">3楼</option></select>
+                    <select id="newRoomType"><option value="大床房(1.5m)">大床房</option><option value="标准间(1.2m)">标准间</option></select>
+                    <button class="btn-sm" id="addRoomBtn"><i class="fas fa-plus"></i> 添加</button>
+                    <button class="btn-sm btn-primary" id="saveConfigBtn"><i class="fas fa-save"></i> 保存</button>
+                </div>
+
+                <!-- 批量增减 -->
+                <div style="background:#e7f1f9; border-radius:24px; padding:15px; margin-top:15px;">
+                    <h4 style="font-size:1rem;"><i class="fas fa-layer-group"></i> 批量增减房间</h4>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <input type="text" id="batchStart" placeholder="起始房号" style="width:80px;">
+                        <span>至</span>
+                        <input type="text" id="batchEnd" placeholder="结束房号" style="width:80px;">
+                        <select id="batchFloor"><option value="1楼">1楼</option><option value="2楼">2楼</option><option value="3楼">3楼</option></select>
+                        <select id="batchType"><option value="大床房(1.5m)">大床房</option><option value="标准间(1.2m)">标准间</option></select>
+                        <button class="btn-sm btn-primary" id="batchAddBtn"><i class="fas fa-plus-circle"></i> 批量添加</button>
+                    </div>
+                    <div style="margin:10px 0;">🗑️ 勾选要删除的房间 (仅空闲/维修可删)</div>
+                    <div id="batchDeleteList" style="max-height:120px; overflow-y:auto; background:white; padding:10px; border-radius:16px;"></div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="btn-sm" id="batchSelectAll"><i class="fas fa-check-square"></i> 全选</button>
+                        <button class="btn-sm" id="batchDeselectAll"><i class="fas fa-square"></i> 取消</button>
+                        <button class="btn-sm btn-danger" id="batchDeleteBtn"><i class="fas fa-trash"></i> 删除选中</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span><i class="fas fa-database"></i> 数据自动保存至浏览器</span>
+        <span><i class="fas fa-key"></i> 管理员: admin123 / 前台: front123 / 保洁: clean123</span>
+    </div>
+</div>
+
+<!-- 订单模态框 -->
+<div class="modal" id="orderModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">新增订单</h3>
+        <input type="hidden" id="orderId">
+        <div class="form-group"><label>客人姓名</label><input type="text" id="orderGuest" placeholder="姓名"></div>
+        <div class="form-group"><label>联系电话</label><input type="tel" id="orderPhone" placeholder="手机号"></div>
+        <div class="form-group"><label>入住日期</label><input type="date" id="orderCheckin" value="2025-06-10"></div>
+        <div class="form-group"><label>离店日期</label><input type="date" id="orderCheckout" value="2025-06-12"></div>
+        <div class="form-group"><label>房型</label>
+            <select id="orderRoomType"><option value="大床房(1.5m)">大床房(1.5m)</option><option value="标准间(1.2m)">标准间(1.2m)</option></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" id="cancelOrderBtn"><i class="fas fa-times"></i> 取消</button>
+            <button class="btn btn-primary" id="saveOrderBtn"><i class="fas fa-save"></i> 保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-message" id="toast"></div>
+
+<script>
+    (function() {
+        // 权限密码
+        const ROLE_PASS = { admin: 'admin123', frontdesk: 'front123', housekeeping: 'clean123' };
+        const STORAGE_ROOMS = 'zjl_rooms_custom_v2';
+        const STORAGE_RECORDS = 'zjl_records_custom_v2';
+        const STORAGE_ORDERS = 'zjl_custom_orders';
+
+        // 默认房间
+        const DEFAULT_ROOMS = [
+            { id: 1, number: '101', floor: '1楼', type: '大床房(1.5m)', status: 'available', group: null },
+            { id: 2, number: '102', floor: '1楼', type: '标准间(1.2m)', status: 'available', group: null },
+            { id: 3, number: '103', floor: '1楼', type: '大床房(1.5m)', status: 'available', group: null },
+            { id: 4, number: '104', floor: '1楼', type: '标准间(1.2m)', status: 'available', group: null },
+            { id: 5, number: '201', floor: '2楼', type: '大床房(1.5m)', status: 'available', group: null },
+            { id: 6, number: '202', floor: '2楼', type: '标准间(1.2m)', status: 'available', group: null },
+            { id: 7, number: '203', floor: '2楼', type: '大床房(1.5m)', status: 'available', group: null },
+            { id: 8, number: '204', floor: '2楼', type: '标准间(1.2m)', status: 'available', group: null },
+            { id: 9, number: '301', floor: '3楼', type: '大床房(1.5m)', status: 'available', group: null },
+            { id: 10, number: '302', floor: '3楼', type: '标准间(1.2m)', status: 'available', group: null }
+        ];
+
+        // 默认订单
+        const DEFAULT_ORDERS = [
+            { id: 'ORD1', guest: '王小明', phone: '13800138001', checkin: '2025-06-10', checkout: '2025-06-12', roomType: '大床房(1.5m)', status: 'new' },
+            { id: 'ORD2', guest: '李丽', phone: '13800138002', checkin: '2025-06-10', checkout: '2025-06-11', roomType: '标准间(1.2m)', status: 'new' },
+            { id: 'ORD3', guest: '张强', phone: '13800138003', checkin: '2025-06-11', checkout: '2025-06-13', roomType: '大床房(1.5m)', status: 'new' }
+        ];
+
+        let rooms = [];
+        let records = [];
+        let orders = [];
+        let currentRole = 'frontdesk';
+
+        // 工具函数
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.style.background = type === 'success' ? '#1c4b2d' : '#b22222';
+            toast.innerHTML = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function generateOrderId() { return 'ORD' + Math.floor(Math.random() * 10000); }
+
+        function loadData() {
+            const storedRooms = localStorage.getItem(STORAGE_ROOMS);
+            const storedRecords = localStorage.getItem(STORAGE_RECORDS);
+            const storedOrders = localStorage.getItem(STORAGE_ORDERS);
+
+            if (storedRooms) {
+                rooms = JSON.parse(storedRooms);
+                rooms.forEach(r => { if (r.group === undefined) r.group = null; });
+            } else {
+                rooms = DEFAULT_ROOMS.map(r => ({ ...r, group: null }));
+            }
+            if (storedRecords) records = JSON.parse(storedRecords) || [];
+            else records = [];
+
+            if (storedOrders) orders = JSON.parse(storedOrders);
+            else orders = DEFAULT_ORDERS.map(o => ({ ...o }));
+
+            sortRooms();
+        }
+        function saveData() {
+            localStorage.setItem(STORAGE_ROOMS, JSON.stringify(rooms));
+            localStorage.setItem(STORAGE_RECORDS, JSON.stringify(records));
+            localStorage.setItem(STORAGE_ORDERS, JSON.stringify(orders));
+            showToast('数据已保存');
+        }
+        function sortRooms() {
+            rooms.sort((a, b) => {
+                const floorA = parseInt(a.floor) || 0;
+                const floorB = parseInt(b.floor) || 0;
+                if (floorA !== floorB) return floorA - floorB;
+                const numA = parseInt(a.number.replace(/\D/g,'')) || 0;
+                const numB = parseInt(b.number.replace(/\D/g,'')) || 0;
+                return numA - numB;
+            });
+        }
+
+        // 权限判断
+        function canCheckin() { return currentRole === 'admin' || currentRole === 'frontdesk'; }
+        function canCheckout() { return currentRole === 'admin' || currentRole === 'frontdesk'; }
+        function canManageOrders() { return currentRole === 'admin' || currentRole === 'frontdesk'; }
+        function canChangeRoomStatus(room, targetStatus) {
+            if (currentRole === 'admin') return true;
+            if (currentRole === 'frontdesk') return ['available','booked','occupied'].includes(targetStatus);
+            if (currentRole === 'housekeeping') return (room.status === 'dirty' && targetStatus === 'available');
+            return false;
+        }
+        function canReset() { return currentRole === 'admin'; }
+        function canConfig() { return currentRole === 'admin'; }
+        function canGroup() { return currentRole !== 'housekeeping'; }
+
+        function verifyPassword(role) {
+            const pwd = prompt(`请输入 ${role==='admin'?'管理员':role==='frontdesk'?'前台':'保洁'} 密码:`);
+            return pwd === ROLE_PASS[role];
+        }
+
+        // 刷新UI
+        function refreshUI() {
+            renderRoomGrid();
+            renderRoomSelect();
+            renderRecords();
+            renderGroupCheckboxes();
+            updateButtonsByRole();
+            updateConfigSection();
+            if (canConfig()) renderBatchDeleteList();
+            renderCustomOrders();
+            const note = document.getElementById('roleNote');
+            if (currentRole === 'admin') note.innerHTML = '<i class="fas fa-crown"></i> 管理员：全部权限，可配置房间及团体';
+            else if (currentRole === 'frontdesk') note.innerHTML = '<i class="fas fa-user-tie"></i> 前台：可入住/退房、订单分配、团体标记';
+            else if (currentRole === 'housekeeping') note.innerHTML = '<i class="fas fa-broom"></i> 保洁：只能将脏房清洁为空闲';
+        }
+
+        // 渲染房间卡片
+        function renderRoomGrid() {
+            const grid = document.getElementById('roomGrid');
+            grid.innerHTML = '';
+            const floorMap = new Map();
+            rooms.forEach(r => {
+                const f = r.floor || '其他';
+                if (!floorMap.has(f)) floorMap.set(f, []);
+                floorMap.get(f).push(r);
+            });
+            const sortedFloors = Array.from(floorMap.keys()).sort((a,b) => (parseInt(a)||0) - (parseInt(b)||0));
+            for (let floor of sortedFloors) {
+                const group = floorMap.get(floor);
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'floor-group';
+                groupDiv.innerHTML = `<div class="floor-title"><i class="fas fa-layer-group"></i> ${floor}</div><div class="room-cards" id="floor-${floor}"></div>`;
+                grid.appendChild(groupDiv);
+                const container = groupDiv.querySelector('.room-cards');
+                group.forEach(room => container.appendChild(createRoomCard(room)));
+            }
+            updateBatchButtons();
+        }
+
+        function createRoomCard(room) {
+            const card = document.createElement('div');
+            card.className = 'room-card';
+            card.dataset.status = room.status;
+            card.dataset.id = room.id;
+            if (room.group?.color) {
+                card.dataset.group = 'true';
+                card.style.setProperty('--group-color', room.group.color);
+            } else {
+                card.dataset.group = '';
+            }
+            const statusMap = { 'available':'空闲','booked':'预订','occupied':'入住','dirty':'脏房','maintenance':'维修' };
+            const statusClass = { 'available':'badge-green','booked':'badge-blue','occupied':'badge-red','dirty':'badge-orange','maintenance':'badge-gray' };
+            card.innerHTML = `
+                <input type="checkbox" class="room-checkbox" data-id="${room.id}" ${canCheckin() ? '' : 'disabled'}>
+                <div class="room-number">${room.number}</div>
+                <div class="room-type">${room.type}</div>
+                ${room.group?.name ? `<div class="group-tag" style="background:${room.group.color};"></div>` : ''}
+                <div class="status-badge ${statusClass[room.status]}">${statusMap[room.status]}</div>
+                <div class="room-actions" data-room-id="${room.id}"></div>
+            `;
+            const actionDiv = card.querySelector('.room-actions');
+            const states = [
+                { value:'available', label:'空闲', icon:'fa-circle' },
+                { value:'booked', label:'预订', icon:'fa-calendar-check' },
+                { value:'occupied', label:'入住', icon:'fa-user' },
+                { value:'dirty', label:'脏房', icon:'fa-broom' },
+                { value:'maintenance', label:'维修', icon:'fa-tools' }
+            ];
+            states.forEach(s => {
+                if (!canChangeRoomStatus(room, s.value)) return;
+                const btn = document.createElement('button');
+                btn.className = 'btn-sm';
+                btn.innerHTML = `<i class="fas ${s.icon}"></i> ${s.label}`;
+                if (room.status === s.value) btn.disabled = true;
+                else btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`将房间 ${room.number} 设为 ${s.label} ？`)) return;
+                    room.status = s.value;
+                    if (s.value !== 'occupied') records = records.filter(r => r.roomId !== room.id);
+                    saveData(); refreshUI();
+                };
+                actionDiv.appendChild(btn);
+            });
+            if (actionDiv.children.length === 0) {
+                const span = document.createElement('span');
+                span.style.fontSize='0.7rem'; span.style.color='#aaa'; span.innerHTML = '<i class="fas fa-ban"></i> 无权限';
+                actionDiv.appendChild(span);
+            }
+            card.querySelector('.room-checkbox').addEventListener('change', function(e) {
+                e.stopPropagation();
+                if (this.checked) card.classList.add('selected');
+                else card.classList.remove('selected');
+                updateBatchButtons();
+            });
+            card.addEventListener('click', (e) => {
+                if (e.target.type !== 'checkbox') {
+                    const cb = card.querySelector('.room-checkbox');
+                    if (cb && !cb.disabled) {
+                        cb.checked = !cb.checked;
+                        if (cb.checked) card.classList.add('selected');
+                        else card.classList.remove('selected');
+                        updateBatchButtons();
+                    }
+                }
+            });
+            return card;
+        }
+
+        function updateBatchButtons() {
+            const checkboxes = document.querySelectorAll('.room-checkbox:checked');
+            const hasChecked = checkboxes.length > 0;
+            document.getElementById('batchCheckinBtn').disabled = !hasChecked || !canCheckin();
+            document.getElementById('batchCheckoutBtn').disabled = !hasChecked || !canCheckout();
+        }
+
+        document.getElementById('clearRoomSelection').addEventListener('click', () => {
+            document.querySelectorAll('.room-checkbox').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.room-card').classList.remove('selected');
+            });
+            updateBatchButtons();
+        });
+
+        // 批量入住
+        document.getElementById('batchCheckinBtn').addEventListener('click', () => {
+            if (!canCheckin()) { alert('无权限'); return; }
+            const selectedRoomIds = Array.from(document.querySelectorAll('.room-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+            const roomsToCheckin = rooms.filter(r => selectedRoomIds.includes(r.id) && (r.status === 'available' || r.status === 'booked'));
+            if (roomsToCheckin.length === 0) { alert('所选房间中没有可入住的房间（必须为空闲或预订）'); return; }
+            const guestName = prompt('请输入客人姓名（统一）', '批量客人');
+            if (!guestName) return;
+            const phone = prompt('请输入联系电话', '13800000000');
+            roomsToCheckin.forEach(room => {
+                room.status = 'occupied';
+                records.push({
+                    roomId: room.id,
+                    roomNumber: room.number,
+                    guestName: guestName,
+                    phone: phone,
+                    cardNumber: `BATCH-${Math.floor(Math.random()*1000)}`
+                });
+            });
+            saveData(); refreshUI();
+            showToast(`已为 ${roomsToCheckin.length} 间房间办理入住`);
+        });
+
+        // 批量退房
+        document.getElementById('batchCheckoutBtn').addEventListener('click', () => {
+            if (!canCheckout()) { alert('无权限'); return; }
+            const selectedRoomIds = Array.from(document.querySelectorAll('.room-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+            const roomsToCheckout = rooms.filter(r => selectedRoomIds.includes(r.id) && r.status === 'occupied');
+            if (roomsToCheckout.length === 0) { alert('所选房间中没有已入住的房间'); return; }
+            if (confirm(`确定为 ${roomsToCheckout.length} 间房间办理退房吗？`)) {
+                roomsToCheckout.forEach(room => {
+                    room.status = 'dirty';
+                    records = records.filter(r => r.roomId !== room.id);
+                });
+                saveData(); refreshUI();
+                showToast(`已为 ${roomsToCheckout.length} 间房间办理退房`);
+            }
+        });
+
+        // 渲染自定义订单列表
+        function renderCustomOrders() {
+            const container = document.getElementById('orderListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            orders.forEach(order => {
+                const div = document.createElement('div');
+                div.className = 'order-item';
+                div.innerHTML = `
+                    <input type="checkbox" class="order-checkbox" data-id="${order.id}" ${canManageOrders() ? '' : 'disabled'}>
+                    <div class="order-info">
+                        <div class="guest-name">${order.guest}</div>
+                        <div class="order-dates">${order.checkin} 至 ${order.checkout} | ${order.roomType}</div>
+                    </div>
+                    <div class="order-actions">
+                        <button class="edit-order" data-id="${order.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-order" data-id="${order.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            document.querySelectorAll('.edit-order').forEach(btn => {
+                btn.addEventListener('click', (e) => { e.stopPropagation(); openEditOrderModal(e.target.dataset.id); });
+            });
+            document.querySelectorAll('.delete-order').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const orderId = e.target.dataset.id;
+                    if (confirm('确定删除该订单吗？')) {
+                        orders = orders.filter(o => o.id !== orderId);
+                        saveData();
+                        renderCustomOrders();
+                        showToast('订单已删除');
+                    }
+                });
+            });
+        }
+
+        // 订单模态框
+        function openAddOrderModal() {
+            document.getElementById('modalTitle').innerText = '新增订单';
+            document.getElementById('orderId').value = '';
+            document.getElementById('orderGuest').value = '';
+            document.getElementById('orderPhone').value = '';
+            document.getElementById('orderCheckin').value = new Date().toISOString().slice(0,10);
+            document.getElementById('orderCheckout').value = new Date(Date.now() + 86400000).toISOString().slice(0,10);
+            document.getElementById('orderRoomType').value = '大床房(1.5m)';
+            document.getElementById('orderModal').classList.add('active');
+        }
+        function openEditOrderModal(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+            document.getElementById('modalTitle').innerText = '编辑订单';
+            document.getElementById('orderId').value = order.id;
+            document.getElementById('orderGuest').value = order.guest;
+            document.getElementById('orderPhone').value = order.phone;
+            document.getElementById('orderCheckin').value = order.checkin;
+            document.getElementById('orderCheckout').value = order.checkout;
+            document.getElementById('orderRoomType').value = order.roomType;
+            document.getElementById('orderModal').classList.add('active');
+        }
+        function saveOrder() {
+            const id = document.getElementById('orderId').value;
+            const guest = document.getElementById('orderGuest').value.trim();
+            const phone = document.getElementById('orderPhone').value.trim();
+            const checkin = document.getElementById('orderCheckin').value;
+            const checkout = document.getElementById('orderCheckout').value;
+            const roomType = document.getElementById('orderRoomType').value;
+            if (!guest || !phone || !checkin || !checkout) { alert('请填写完整信息'); return; }
+            if (id) {
+                const order = orders.find(o => o.id === id);
+                if (order) { order.guest = guest; order.phone = phone; order.checkin = checkin; order.checkout = checkout; order.roomType = roomType; }
+            } else {
+                orders.push({ id: generateOrderId(), guest, phone, checkin, checkout, roomType, status: 'new' });
+            }
+            saveData(); renderCustomOrders(); closeOrderModal(); showToast('订单已保存');
+        }
+        function closeOrderModal() { document.getElementById('orderModal').classList.remove('active'); }
+
+        // 分配订单
+        function assignOrderToSelectedRooms(orderId) {
+            if (!canCheckin()) { alert('无权限'); return; }
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            const selectedRoomIds = Array.from(document.querySelectorAll('.room-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+            const roomsToAssign = rooms.filter(r => selectedRoomIds.includes(r.id) && (r.status === 'available' || r.status === 'booked') && r.type === order.roomType);
+            if (roomsToAssign.length === 0) { alert('没有符合条件的空闲房间（房型需匹配）'); return; }
+            roomsToAssign.forEach(room => {
+                room.status = 'occupied';
+                records.push({
+                    roomId: room.id,
+                    roomNumber: room.number,
+                    guestName: order.guest,
+                    phone: order.phone,
+                    cardNumber: `ORD-${order.id}`
+                });
+            });
+            saveData(); refreshUI();
+            showToast(`已为订单 ${order.guest} 分配 ${roomsToAssign.length} 间房间`);
+        }
+
+        document.getElementById('assignOrdersBtn').addEventListener('click', () => {
+            const selectedOrderIds = Array.from(document.querySelectorAll('.order-checkbox:checked')).map(cb => cb.dataset.id);
+            if (selectedOrderIds.length === 0) { alert('请至少选择一个订单'); return; }
+            assignOrderToSelectedRooms(selectedOrderIds[0]);
+        });
+
+        document.getElementById('refreshOrdersBtn').addEventListener('click', () => {
+            orders = DEFAULT_ORDERS.map(o => ({ ...o }));
+            saveData(); renderCustomOrders(); showToast('已重置为示例订单');
+        });
+
+        // 模态框事件
+        document.getElementById('addOrderBtn').addEventListener('click', openAddOrderModal);
+        document.getElementById('cancelOrderBtn').addEventListener('click', closeOrderModal);
+        document.getElementById('saveOrderBtn').addEventListener('click', saveOrder);
+        document.getElementById('orderModal').addEventListener('click', (e) => { if (e.target === document.getElementById('orderModal')) closeOrderModal(); });
+
+        // 以下是原有功能的简化实现（保持兼容）
+        function renderRoomSelect() {
+            const sel = document.getElementById('roomSelect');
+            sel.innerHTML = '<option value="">--选择房间--</option>';
+            rooms.filter(r => r.status === 'available' || r.status === 'booked').forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = `${r.number} (${r.type}) [${r.status === 'available' ? '空闲' : '预订'}]`;
+                sel.appendChild(opt);
+            });
+        }
+        function renderRecords() {
+            const tbody = document.getElementById('recordBody');
+            tbody.innerHTML = '';
+            if (!records.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">暂无入住记录</td></tr>'; return; }
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${r.roomNumber}</td><td>${r.guestName}</td><td>${r.phone || '—'}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        function renderGroupCheckboxes() {
+            const container = document.getElementById('groupCheckContainer');
+            if (!canGroup()) { container.innerHTML = '<div style="padding:10px; color:#888;"><i class="fas fa-ban"></i> 无团体权限</div>'; return; }
+            container.innerHTML = '';
+            rooms.forEach(room => {
+                if (room.status === 'occupied' || room.status === 'available' || room.status === 'booked') {
+                    const label = document.createElement('label');
+                    label.className = 'group-check-item';
+                    label.innerHTML = `<input type="checkbox" class="group-chk" value="${room.id}"> ${room.number}`;
+                    container.appendChild(label);
+                }
+            });
+        }
+        function renderBatchDeleteList() {
+            const container = document.getElementById('batchDeleteList');
+            if (!container) return;
+            container.innerHTML = '';
+            rooms.forEach(room => {
+                if (room.status === 'available' || room.status === 'maintenance') {
+                    const label = document.createElement('label');
+                    label.style.display = 'inline-flex'; label.style.alignItems = 'center'; label.style.gap = '6px'; label.style.marginRight = '10px';
+                    label.innerHTML = `<input type="checkbox" class="batch-del-chk" value="${room.id}"> ${room.number} (${room.floor})`;
+                    container.appendChild(label);
+                }
+            });
+        }
+        function updateButtonsByRole() {
+            document.getElementById('checkinBtn').disabled = !canCheckin();
+            document.getElementById('checkoutBtn').disabled = !canCheckout();
+            document.getElementById('resetRoomsBtn').disabled = !canReset();
+        }
+        function updateConfigSection() {
+            const cfgDiv = document.getElementById('configSection');
+            if (canConfig()) { cfgDiv.style.display = 'block'; renderConfigTable(); } else cfgDiv.style.display = 'none';
+        }
+        function renderConfigTable() {
+            const tbody = document.getElementById('configBody');
+            tbody.innerHTML = '';
+            rooms.forEach(room => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = room.id;
+                const statusMap = {'available':'空闲','booked':'预订','occupied':'入住','dirty':'脏房','maintenance':'维修'};
+                tr.innerHTML = `
+                    <td><input class="config-number" value="${room.number}" style="width:60px;"></td>
+                    <td><input class="config-floor" value="${room.floor||'1楼'}" style="width:70px;"></td>
+                    <td><select class="config-type"><option value="大床房(1.5m)" ${room.type==='大床房(1.5m)'?'selected':''}>大床房</option><option value="标准间(1.2m)" ${room.type==='标准间(1.2m)'?'selected':''}>标准间</option></select></td>
+                    <td>${statusMap[room.status]}</td>
+                    <td><button class="btn-sm delete-room" data-id="${room.id}"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.querySelectorAll('.delete-room').forEach(b => b.addEventListener('click', (e) => {
+                const id = +e.target.closest('button').dataset.id;
+                const room = rooms.find(r => r.id === id);
+                if (!room || (room.status !== 'available' && room.status !== 'maintenance')) { alert('只能删除空闲/维修房间'); return; }
+                if (confirm(`删除房间 ${room.number}？`)) {
+                    rooms = rooms.filter(r => r.id !== id);
+                    records = records.filter(r => r.roomId !== id);
+                    saveData(); refreshUI();
+                }
+            }));
+        }
+        function checkin() {
+            const name = document.getElementById('guestName').value.trim();
+            const phone = document.getElementById('guestPhone').value.trim();
+            const roomId = document.getElementById('roomSelect').value;
+            const card = document.getElementById('cardNumber').value.trim() || `C${Math.floor(Math.random()*1000)}`;
+            if (!name || !phone || !roomId) { alert('姓名、电话、房间必填'); return; }
+            const room = rooms.find(r => r.id == roomId);
+            if (!room || (room.status !== 'available' && room.status !== 'booked')) { alert('房间不可入住'); return; }
+            room.status = 'occupied';
+            records.push({ roomId: room.id, roomNumber: room.number, guestName: name, phone, cardNumber: card });
+            saveData(); refreshUI();
+            document.getElementById('guestName').value = ''; document.getElementById('guestPhone').value = ''; document.getElementById('cardNumber').value = '';
+        }
+        function checkout() {
+            const occ = rooms.filter(r => r.status === 'occupied');
+            if (!occ.length) { alert('无入住房间'); return; }
+            const nums = occ.map(r => r.number).join(', ');
+            const inp = prompt(`输入退房房间号 (已入住: ${nums})`);
+            if (!inp) return;
+            const room = rooms.find(r => r.number === inp.trim() && r.status === 'occupied');
+            if (!room) { alert('房间未入住'); return; }
+            room.status = 'dirty';
+            records = records.filter(r => r.roomId !== room.id);
+            saveData(); refreshUI();
+        }
+        function resetDefault() {
+            if (!canReset()) { alert('无权限'); return; }
+            if (confirm('重置为默认配置？')) {
+                rooms = DEFAULT_ROOMS.map(r => ({ ...r, group: null }));
+                records = [];
+                saveData(); refreshUI();
+            }
+        }
+        function addRoom() {
+            if (!canConfig()) return;
+            const num = document.getElementById('newRoomNumber').value.trim();
+            const floor = document.getElementById('newRoomFloor').value;
+            const type = document.getElementById('newRoomType').value;
+            if (!num) { alert('房号必填'); return; }
+            if (rooms.some(r => r.number === num)) { alert('房号已存在'); return; }
+            const newId = rooms.length ? Math.max(...rooms.map(r=>r.id)) + 1 : 1;
+            rooms.push({ id: newId, number: num, floor, type, status: 'available', group: null });
+            sortRooms(); saveData(); refreshUI();
+            document.getElementById('newRoomNumber').value = '';
+        }
+        function saveConfig() {
+            const rows = document.querySelectorAll('#configBody tr');
+            let error = [];
+            for (let row of rows) {
+                const id = +row.dataset.id;
+                const num = row.querySelector('.config-number').value.trim();
+                const floor = row.querySelector('.config-floor').value.trim();
+                const type = row.querySelector('.config-type').value;
+                const room = rooms.find(r => r.id === id);
+                if (!room) continue;
+                if (!num || !floor) { error.push(`房间${id}数据不全`); continue; }
+                if (num !== room.number && rooms.some(r => r.id !== id && r.number === num)) { error.push(`房号${num}重复`); continue; }
+                if (room.status === 'occupied' && num !== room.number) { error.push(`入住中不能改房号`); continue; }
+                room.number = num; room.floor = floor; room.type = type;
+                records.forEach(r => { if (r.roomId === id) r.roomNumber = num; });
+            }
+            if (error.length) { alert('错误:\n' + error.join('\n')); return; }
+            sortRooms(); saveData(); refreshUI(); alert('配置已保存');
+        }
+        function applyGroup() {
+            if (!canGroup()) { alert('权限不足'); return; }
+            const checkboxes = document.querySelectorAll('.group-chk:checked');
+            const selected = Array.from(checkboxes).map(c => +c.value);
+            if (!selected.length) { alert('至少选一个房间'); return; }
+            const groupName = document.getElementById('groupNameInput').value.trim() || '无名团';
+            const groupColor = document.getElementById('groupColorSelect').value;
+            rooms.forEach(r => { if (selected.includes(r.id)) r.group = { name: groupName, color: groupColor }; });
+            saveData(); refreshUI();
+        }
+        function clearGroup() {
+            const checkboxes = document.querySelectorAll('.group-chk:checked');
+            const selected = Array.from(checkboxes).map(c => +c.value);
+            rooms.forEach(r => { if (selected.includes(r.id)) r.group = null; });
+            saveData(); refreshUI();
+        }
+        function batchAdd() {
+            if (!canConfig()) return;
+            const startStr = document.getElementById('batchStart').value.trim();
+            const endStr = document.getElementById('batchEnd').value.trim();
+            const floor = document.getElementById('batchFloor').value;
+            const type = document.getElementById('batchType').value;
+            if (!startStr || !endStr) { alert('请输入起始和结束房号'); return; }
+            const start = parseInt(startStr.replace(/\D/g,''));
+            const end = parseInt(endStr.replace(/\D/g,''));
+            if (isNaN(start) || isNaN(end) || start > end) { alert('无效的数字范围'); return; }
+            let added = 0, skipped = [], maxId = rooms.length ? Math.max(...rooms.map(r=>r.id)) : 0;
+            for (let num = start; num <= end; num++) {
+                const roomNumber = num.toString();
+                if (rooms.some(r => r.number === roomNumber)) { skipped.push(roomNumber); continue; }
+                maxId++; rooms.push({ id: maxId, number: roomNumber, floor, type, status: 'available', group: null }); added++;
+            }
+            if (added > 0) { sortRooms(); saveData(); refreshUI(); alert(`批量添加完成: 新增 ${added} 间, 跳过: ${skipped.join(', ') || '无'}`); }
+            else alert('没有新增任何房间');
+            document.getElementById('batchStart').value = ''; document.getElementById('batchEnd').value = '';
+        }
+        function batchDeleteSelected() {
+            if (!canConfig()) return;
+            const checkboxes = document.querySelectorAll('.batch-del-chk:checked');
+            const selected = Array.from(checkboxes).map(c => +c.value);
+            if (!selected.length) { alert('请至少勾选一个房间'); return; }
+            if (!confirm(`确定删除选中的 ${selected.length} 个房间？`)) return;
+            let deleted = 0;
+            rooms = rooms.filter(r => {
+                if (selected.includes(r.id)) {
+                    if (r.status !== 'available' && r.status !== 'maintenance') return true;
+                    deleted++; return false;
+                }
+                return true;
+            });
+            records = records.filter(r => !selected.includes(r.roomId));
+            saveData(); refreshUI(); alert(`已删除 ${deleted} 个房间`);
+        }
+        function batchSelectAll() { document.querySelectorAll('.batch-del-chk').forEach(cb => cb.checked = true); }
+        function batchDeselectAll() { document.querySelectorAll('.batch-del-chk').forEach(cb => cb.checked = false); }
+
+        // 角色切换
+        const roleSelect = document.getElementById('roleSelect');
+        roleSelect.addEventListener('change', (e) => {
+            const newRole = e.target.value;
+            if (verifyPassword(newRole)) {
+                currentRole = newRole;
+                refreshUI();
+            } else { alert('密码错误'); roleSelect.value = currentRole; }
+        });
+
+        // 绑定按钮
+        document.getElementById('checkinBtn').addEventListener('click', checkin);
+        document.getElementById('checkoutBtn').addEventListener('click', checkout);
+        document.getElementById('resetRoomsBtn').addEventListener('click', resetDefault);
+        document.getElementById('addRoomBtn').addEventListener('click', addRoom);
+        document.getElementById('saveConfigBtn').addEventListener('click', saveConfig);
+        document.getElementById('applyGroupBtn').addEventListener('click', applyGroup);
+        document.getElementById('clearGroupBtn').addEventListener('click', clearGroup);
+        document.getElementById('batchAddBtn').addEventListener('click', batchAdd);
+        document.getElementById('batchDeleteBtn').addEventListener('click', batchDeleteSelected);
+        document.getElementById('batchSelectAll').addEventListener('click', batchSelectAll);
+        document.getElementById('batchDeselectAll').addEventListener('click', batchDeselectAll);
+
+        // 初始化
+        loadData();
+        currentRole = 'frontdesk';
+        roleSelect.value = 'frontdesk';
+        refreshUI();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金竹林 · 仓库管理系统</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
+        body {
+            background: #f5f7fa;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .warehouse-container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 45px -15px rgba(0,20,40,0.2);
+            overflow: hidden;
+            border: 1px solid #e6edf4;
+        }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e6edf4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 i { color: #3a6ea5; }
+        .header-stats {
+            display: flex;
+            gap: 20px;
+        }
+        .stat-badge {
+            background: #f0f3f7;
+            padding: 8px 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5e6f8d;
+        }
+        .stat-badge span { font-weight: 600; color: #2c3e50; margin-left: 5px; }
+        
+        /* 工具栏 */
+        .toolbar {
+            padding: 20px 30px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e6edf4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .search-area {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            max-width: 400px;
+        }
+        .search-area input {
+            flex: 1;
+            padding: 10px 18px;
+            border: 1px solid #d0ddee;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .search-area input:focus { border-color: #3a6ea5; }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid #d0ddee;
+            background: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: #3a6ea5;
+            border-color: #3a6ea5;
+            color: white;
+        }
+        .btn-primary:hover { background: #5982b9; }
+        .btn-success {
+            background: #4a7d6e;
+            border-color: #4a7d6e;
+            color: white;
+        }
+        .btn-success:hover { background: #5e957a; }
+        .btn-warning {
+            background: #b68b5c;
+            border-color: #b68b5c;
+            color: white;
+        }
+        .btn-warning:hover { background: #c49a6a; }
+        .btn-outline:hover { background: #f0f3f7; }
+        
+        /* 表格 */
+        .table-wrapper {
+            padding: 0 30px 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            background: #f8fafc;
+            color: #5e6f8d;
+            font-weight: 500;
+            border-bottom: 1px solid #e6edf4;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eef2f8;
+            color: #2c3e50;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-normal { background: #e3f0e8; color: #2c6b4b; }
+        .status-low { background: #fef3e0; color: #b68b5c; }
+        .status-out { background: #ffe8e8; color: #b22222; }
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 30px;
+            color: #8a9bb5;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: #f0f3f7; color: #3a6ea5; }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            max-width: 500px;
+            width: 90%;
+            padding: 30px;
+        }
+        .modal-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #5e6f8d;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #d0ddee;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .footer {
+            padding: 15px 30px;
+            border-top: 1px solid #e6edf4;
+            color: #8a9bb5;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            display: none;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+<div class="warehouse-container">
+    <div class="header">
+        <h1><i class="fas fa-boxes"></i> 仓库管理系统</h1>
+        <div class="header-stats">
+            <div class="stat-badge"><i class="fas fa-cubes"></i> 总库存 <span id="totalItems">0</span></div>
+            <div class="stat-badge"><i class="fas fa-exclamation-triangle"></i> 低库存 <span id="lowStockCount">0</span></div>
+        </div>
+    </div>
+    
+    <div class="toolbar">
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="搜索物资名称...">
+            <button class="btn btn-outline" id="searchBtn"><i class="fas fa-search"></i> 搜索</button>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="addBtn"><i class="fas fa-plus"></i> 新增物资</button>
+            <button class="btn btn-outline" id="refreshBtn"><i class="fas fa-sync-alt"></i> 刷新</button>
+        </div>
+    </div>
+    
+    <div class="table-wrapper">
+        <table id="inventoryTable">
+            <thead>
+                <tr><th>物资名称</th><th>类别</th><th>单位</th><th>库存数量</th><th>单价(¥)</th><th>总价值(¥)</th><th>状态</th><th>操作</th> </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <div class="footer">
+        <i class="fas fa-save"></i> 数据自动保存至浏览器 · 支持增删改查
+    </div>
+</div>
+
+<!-- 模态框 -->
+<div class="modal" id="itemModal">
+    <div class="modal-content">
+        <h3 id="modalTitle"><i class="fas fa-box"></i> 新增物资</h3>
+        <input type="hidden" id="itemId">
+        <div class="form-group"><label>物资名称</label><input type="text" id="itemName" placeholder="请输入物资名称"></div>
+        <div class="form-group"><label>类别</label>
+            <select id="itemCategory">
+                <option value="食材">食材</option><option value="酒水">酒水</option><option value="日用品">日用品</option>
+                <option value="调料">调料</option><option value="其他">其他</option>
+            </select>
+        </div>
+        <div class="form-group"><label>单位</label><input type="text" id="itemUnit" placeholder="如：箱、瓶、斤、袋"></div>
+        <div class="form-group"><label>库存数量</label><input type="number" id="itemQuantity" min="0" step="1" value="0"></div>
+        <div class="form-group"><label>单价 (¥)</label><input type="number" id="itemPrice" min="0" step="0.01" value="0"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelModalBtn">取消</button>
+            <button class="btn btn-primary" id="saveItemBtn">保存</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span>操作成功</span></div>
+
+<script>
+    (function() {
+        const STORAGE_KEY = 'jzl_warehouse_items';
+        
+        // 默认示例数据
+        const DEFAULT_ITEMS = [
+            { id: '1', name: '大米', category: '食材', unit: '袋', quantity: 50, price: 98 },
+            { id: '2', name: '食用油', category: '食材', unit: '桶', quantity: 30, price: 68 },
+            { id: '3', name: '啤酒', category: '酒水', unit: '箱', quantity: 120, price: 45 },
+            { id: '4', name: '纸巾', category: '日用品', unit: '提', quantity: 80, price: 12 },
+            { id: '5', name: '酱油', category: '调料', unit: '瓶', quantity: 25, price: 15 },
+            { id: '6', name: '洗洁精', category: '日用品', unit: '桶', quantity: 15, price: 22 }
+        ];
+        
+        let items = [];
+        let searchKeyword = '';
+        
+        // 提示
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.querySelector('span').innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+        
+        // 加载数据
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try { items = JSON.parse(stored); } catch { items = [...DEFAULT_ITEMS]; }
+            } else {
+                items = [...DEFAULT_ITEMS];
+            }
+            renderTable();
+            updateStats();
+        }
+        
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            showToast('数据已保存');
+        }
+        
+        function updateStats() {
+            const total = items.reduce((sum, item) => sum + item.quantity, 0);
+            const lowStock = items.filter(item => item.quantity < 20).length;
+            document.getElementById('totalItems').innerText = total;
+            document.getElementById('lowStockCount').innerText = lowStock;
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            let filtered = items;
+            if (searchKeyword) {
+                filtered = items.filter(item => item.name.includes(searchKeyword) || item.category.includes(searchKeyword));
+            }
+            
+            tbody.innerHTML = '';
+            filtered.forEach(item => {
+                const totalValue = (item.quantity * item.price).toFixed(2);
+                let statusClass = 'status-normal';
+                let statusText = '正常';
+                if (item.quantity <= 0) { statusClass = 'status-out'; statusText = '缺货'; }
+                else if (item.quantity < 20) { statusClass = 'status-low'; statusText = '低库存'; }
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${escapeHtml(item.name)}</strong></td>
+                    <td>${escapeHtml(item.category)}</td>
+                    <td>${escapeHtml(item.unit)}</td>
+                    <td>${item.quantity}</td>
+                    <td>¥ ${item.price.toFixed(2)}</td>
+                    <td>¥ ${totalValue}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="window.editItem('${item.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn" onclick="window.deleteItem('${item.id}')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="action-btn" onclick="window.inOutItem('${item.id}')"><i class="fas fa-exchange-alt"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:#8a9bb5;"><i class="fas fa-box-open"></i> 暂无数据，点击"新增物资"添加</td></tr>';
+            }
+        }
+        
+        function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+        
+        // 新增/编辑
+        function openAddModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> 新增物资';
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemCategory').value = '食材';
+            document.getElementById('itemUnit').value = '';
+            document.getElementById('itemQuantity').value = '0';
+            document.getElementById('itemPrice').value = '0';
+            document.getElementById('itemModal').classList.add('active');
+        }
+        
+        function openEditModal(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> 编辑物资';
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemUnit').value = item.unit;
+            document.getElementById('itemQuantity').value = item.quantity;
+            document.getElementById('itemPrice').value = item.price;
+            document.getElementById('itemModal').classList.add('active');
+        }
+        
+        function saveItem() {
+            const id = document.getElementById('itemId').value;
+            const name = document.getElementById('itemName').value.trim();
+            const category = document.getElementById('itemCategory').value;
+            const unit = document.getElementById('itemUnit').value.trim();
+            const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
+            const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            
+            if (!name) { alert('请输入物资名称'); return; }
+            if (!unit) { alert('请输入单位'); return; }
+            
+            if (id) {
+                const index = items.findIndex(i => i.id === id);
+                if (index !== -1) {
+                    items[index] = { ...items[index], name, category, unit, quantity, price };
+                }
+            } else {
+                const newId = Date.now().toString();
+                items.push({ id: newId, name, category, unit, quantity, price });
+            }
+            saveData();
+            renderTable();
+            updateStats();
+            closeModal();
+            showToast('保存成功');
+        }
+        
+        function deleteItem(id) {
+            if (confirm('确定删除该物资吗？')) {
+                items = items.filter(i => i.id !== id);
+                saveData();
+                renderTable();
+                updateStats();
+                showToast('已删除');
+            }
+        }
+        
+        function inOutItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            const action = prompt(`出入库操作\n当前库存: ${item.quantity} ${item.unit}\n输入 "+数量" 增加，"-数量" 减少`, '+0');
+            if (!action) return;
+            const match = action.match(/^([+-])(\d+)$/);
+            if (!match) { alert('格式错误，请输入如 +10 或 -5'); return; }
+            const delta = parseInt(match[2]);
+            if (match[1] === '+') {
+                item.quantity += delta;
+            } else {
+                if (item.quantity - delta < 0) { alert('库存不足'); return; }
+                item.quantity -= delta;
+            }
+            saveData();
+            renderTable();
+            updateStats();
+            showToast(`操作成功，当前库存: ${item.quantity}`);
+        }
+        
+        function closeModal() { document.getElementById('itemModal').classList.remove('active'); }
+        
+        function searchItems() {
+            searchKeyword = document.getElementById('searchInput').value.trim();
+            renderTable();
+        }
+        
+        function refreshData() {
+            searchKeyword = '';
+            document.getElementById('searchInput').value = '';
+            renderTable();
+        }
+        
+        // 全局函数
+        window.editItem = openEditModal;
+        window.deleteItem = deleteItem;
+        window.inOutItem = inOutItem;
+        
+        // 事件绑定
+        document.getElementById('addBtn').addEventListener('click', openAddModal);
+        document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+        document.getElementById('saveItemBtn').addEventListener('click', saveItem);
+        document.getElementById('searchBtn').addEventListener('click', searchItems);
+        document.getElementById('refreshBtn').addEventListener('click', refreshData);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchItems(); });
+        document.getElementById('itemModal').addEventListener('click', (e) => { if (e.target === document.getElementById('itemModal')) closeModal(); });
+        
+        // 初始化
+        loadData();
+    })();
+</script>
+</body>
+</html>

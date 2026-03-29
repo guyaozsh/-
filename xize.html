@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金竹林 · 管理细则文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 25px 20px;
+            color: #1e3a4a;
+        }
+        .document-card {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 45px -15px #1f3f3f80;
+            overflow: hidden;
+            border: 1px solid #dbe2ed;
+        }
+        .header {
+            background: #1c4b2d;
+            color: white;
+            padding: 22px 35px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            font-weight: 500;
+            font-size: 2.4rem;
+            letter-spacing: 0.3px;
+        }
+        .header h1 small {
+            font-size: 1rem;
+            background: #35754b;
+            padding: 6px 16px;
+            border-radius: 60px;
+            margin-left: 18px;
+            font-weight: 300;
+        }
+        .badge {
+            background: #fdda7a;
+            color: #1c4b2d;
+            font-weight: 600;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+        }
+        .toolbar {
+            background: #f8fcff;
+            padding: 14px 30px;
+            border-bottom: 1px solid #c8d7ea;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 20px;
+            justify-content: space-between;
+        }
+        .btn {
+            background: white;
+            border: 1px solid #b7cbdf;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #1e405a;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 2px 4px #00000008;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: #1c4b2d;
+            border-color: #123b20;
+            color: white;
+            box-shadow: 0 5px 10px #1c4b2d40;
+        }
+        .btn-primary:hover { background: #165024; }
+        .btn-outline:hover { background: #e1efff; }
+        .edit-indicator {
+            background: #e3f0fa;
+            border-radius: 60px;
+            padding: 5px 25px;
+            border: 1px dashed #1c4b2d;
+            color: #1c4b2d;
+            font-size: 0.9rem;
+        }
+        .security-panel {
+            background: #fff7e7;
+            border-left: 6px solid #f7b547;
+            border-radius: 50px;
+            margin: 15px 30px 0 30px;
+            padding: 12px 25px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .security-panel.hidden { display: none; }
+        .security-btn {
+            background: none;
+            border: 1px solid #dba959;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #704c17;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #00000060;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-overlay.hidden { display: none; }
+        .modal-card {
+            background: white;
+            max-width: 450px;
+            width: 90%;
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 30px 50px #001f3f50;
+        }
+        .modal-card h3 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            color: #1f4b2e;
+            border-bottom: 2px solid #deecf9;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin: 18px 0;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #2e4f6e;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 1px solid #c4d3e5;
+            border-radius: 40px;
+            font-size: 1rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        .content-area {
+            padding: 35px 40px;
+            background: white;
+            transition: background 0.2s;
+        }
+        .content-area[contenteditable="true"] {
+            background: #fefef0;
+            outline: 3px dashed #f7b547;
+            outline-offset: 12px;
+            border-radius: 20px;
+        }
+        .img-figure {
+            margin: 20px 0;
+            text-align: center;
+            background: #fafdff;
+            border-radius: 24px;
+            padding: 15px;
+            border: 1px solid #dde6f2;
+        }
+        .img-figure img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 20px;
+            box-shadow: 0 6px 14px #bfd4e8;
+            background: #f0f7ff;
+            padding: 5px;
+        }
+        .img-figure figcaption {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: #3e6083;
+            font-style: italic;
+        }
+        .img-figure .file-hint {
+            font-family: 'Courier New', monospace;
+            background: #e2ecf9;
+            padding: 3px 15px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .toc {
+            background: #f5faff;
+            padding: 20px 30px;
+            border-radius: 28px;
+            margin-bottom: 40px;
+            border: 1px solid #cbdaf0;
+            columns: 2 260px;
+            column-gap: 30px;
+        }
+        .toc-item { break-inside: avoid; margin-bottom: 5px; }
+        .toc-item a { text-decoration: none; color: #1b4f3a; border-bottom: 1px dotted #8fb3d9; }
+        .toc-level-2 { font-weight: 600; margin-top: 8px; }
+        .toc-level-3 { padding-left: 20px; font-size: 0.94rem; }
+        .toc-level-4 { padding-left: 38px; font-size: 0.88rem; color: #2e5a72; }
+        h2 { font-size: 2rem; margin: 2.5rem 0 1rem; border-bottom: 2px solid #c7d9eb; }
+        h3 { font-size: 1.6rem; margin: 2rem 0 1rem; color: #1d4b31; }
+        h4 { font-size: 1.2rem; margin: 1.5rem 0 0.3rem; color: #2b5c45; }
+        p { margin: 0.7rem 0; line-height: 1.6; }
+        ul, ol { margin-left: 2rem; margin-bottom: 1rem; }
+        hr { margin: 40px 0; border: 1px dashed #c7d6e5; }
+        .footer {
+            background: #edf3fa;
+            padding: 15px 35px;
+            text-align: right;
+            color: #4b6c89;
+            border-top: 1px solid #c7d6e5;
+        }
+    </style>
+</head>
+<body>
+<div class="document-card" id="app">
+    <div class="header">
+        <h1>金竹林农家乐 <small>2025 管理细则</small></h1>
+        <div class="badge">图片直显 · 安全中心</div>
+    </div>
+
+    <div class="toolbar">
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline" id="editRequestBtn"><span>✎</span> 编辑内容（需密码）</button>
+            <button class="btn btn-outline" id="saveExitBtn" style="display: none;"><span>💾</span> 保存并退出</button>
+            <button class="btn btn-outline" id="resetDefaultBtn" style="display: none;"><span>↺</span> 恢复默认</button>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span class="edit-indicator" id="editModeIndicator" style="display: none;">🔒 浏览模式</span>
+            <button class="security-btn" id="securitySettingsBtn">⚙️ 安全设置</button>
+        </div>
+    </div>
+
+    <!-- 安全快捷面板 -->
+    <div class="security-panel hidden" id="securityQuickPanel">
+        <span style="font-weight: 500;">🔐 安全中心：</span>
+        <div style="display: flex; gap: 12px;">
+            <button class="btn-small btn-outline" id="changePwdBtn">修改密码</button>
+            <button class="btn-small btn-outline" id="forgotPwdBtn">忘记密码？</button>
+            <button class="btn-small btn-outline" id="closeSecurityPanel">关闭</button>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal-card" id="modalContent"></div>
+    </div>
+
+    <!-- 主内容区（可编辑） -->
+    <div class="content-area" id="mainContent"></div>
+
+    <div class="footer">
+        提示：图片请放在 <strong>media/</strong> 文件夹（与html同级）<span style="margin-left: 30px;">🔑 默认密码 jzlnjl</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 数据存储 key ----------
+        const STORAGE_CONTENT = 'jzl_content_v3';
+        const STORAGE_PASSWORD = 'jzl_password';
+        const STORAGE_QUESTION = 'jzl_security_question';
+        const STORAGE_ANSWER = 'jzl_security_answer';
+
+        // 默认密码
+        const DEFAULT_PASSWORD = 'jzlnjl';
+
+        if (!localStorage.getItem(STORAGE_PASSWORD)) {
+            localStorage.setItem(STORAGE_PASSWORD, DEFAULT_PASSWORD);
+        }
+
+        // ---------- 完整内容（所有图片用img标签，直接引用media/下的文件）----------
+        const DEFAULT_CONTENT_HTML = `
+            <div class="toc">
+                <div class="toc-item toc-level-2"><a href="#canyin">第一部分：餐饮部</a></div>
+                <div class="toc-item toc-level-3"><a href="#qiantai">1. 前台管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#shouyin">1.1 收银系统</a></div>
+                <div class="toc-item toc-level-4"><a href="#fapiao">1.2 发票管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#dayinji">1.3 打印机</a></div>
+                <div class="toc-item toc-level-4"><a href="#jiankong">1.4 监控系统</a></div>
+                <div class="toc-item toc-level-3"><a href="#caiwu">2. 财务管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#shouru">2.1 收入统计</a></div>
+                <div class="toc-item toc-level-4"><a href="#zhichu">2.2 支出统计</a></div>
+                <div class="toc-item toc-level-4"><a href="#jibao">2.3 季度财报</a></div>
+                <div class="toc-item toc-level-3"><a href="#wuzi">3. 物资采购</a></div>
+                <div class="toc-item toc-level-4"><a href="#zhudong">3.1 主动采购</a></div>
+                <div class="toc-item toc-level-4"><a href="#songhuo">3.2 送货上门</a></div>
+                <div class="toc-item toc-level-3"><a href="#yuangong">4. 员工管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#weisheng">4.1 卫生部门</a></div>
+                <div class="toc-item toc-level-4"><a href="#houchu">4.2 后厨</a></div>
+                <div class="toc-item toc-level-3"><a href="#wuliao">5. 物料使用与存放</a></div>
+                <div class="toc-item toc-level-4"><a href="#qingjie">5.1 清洁剂使用</a></div>
+                <div class="toc-item toc-level-4"><a href="#weizhi">5.2 物品放置位置</a></div>
+                <div class="toc-item toc-level-2"><a href="#zhusu">第二部分：住宿部</a></div>
+                <div class="toc-item toc-level-3"><a href="#fangka">1. 房卡管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#fangkaxt">1.1 房卡发放系统</a></div>
+                <div class="toc-item toc-level-4"><a href="#qiantai-fk">1.2 前台接待发卡</a></div>
+                <div class="toc-item toc-level-4"><a href="#yuangong-fk">1.3 员工用卡（总卡）</a></div>
+                <div class="toc-item toc-level-4"><a href="#zhuxiao">1.4 卡片注销与管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#menyaoshi">1.5 门锁钥匙及应急处理</a></div>
+                <div class="toc-item toc-level-3"><a href="#shenfen">2. 身份信息登记</a></div>
+                <div class="toc-item toc-level-4"><a href="#denglu">2.1 登记系统登录</a></div>
+                <div class="toc-item toc-level-4"><a href="#ruzhulidian">2.2 旅客入住与离店登记</a></div>
+                <div class="toc-item toc-level-3"><a href="#wangluo">3. 网络平台管理</a></div>
+                <div class="toc-item toc-level-4"><a href="#xiecheng">3.1 携程</a></div>
+                <div class="toc-item toc-level-4"><a href="#meituan">3.2 美团</a></div>
+                <div class="toc-item toc-level-4"><a href="#feizhu">3.3 飞猪</a></div>
+                <div class="toc-item toc-level-3"><a href="#bucao">4. 布草和物料</a></div>
+                <div class="toc-item toc-level-3"><a href="#pingmian">5. 平面示意图</a></div>
+            </div>
+
+            <h2 id="canyin">第一部分：餐饮部</h2>
+            <h3 id="qiantai">1. 前台管理</h3>
+            <h4 id="shouyin">1.1 收银系统</h4>
+            <p><strong>1.1.1 开机</strong>：按下收银机背部电源按钮，启动至桌面。</p>
+            <figure class="img-figure"><img src="media/image2.jpeg" alt="图1-1 开机界面" loading="lazy"><figcaption>图1-1 开机界面 <span class="file-hint">media/image2.jpeg</span></figcaption></figure>
+            <p><strong>1.1.2 进入点单系统</strong>：单击“餐饮系统”图标。</p>
+            <figure class="img-figure"><img src="media/image3.jpeg" alt="图1-2 餐饮系统图标" loading="lazy"><figcaption>图1-2 餐饮系统图标 <span class="file-hint">media/image3.jpeg</span></figcaption></figure>
+            <p><strong>1.1.3 登录</strong>：单击登录按钮。</p>
+            <figure class="img-figure"><img src="media/image4.jpeg" alt="图1-3 登录页面" loading="lazy"><figcaption>图1-3 登录页面 <span class="file-hint">media/image4.jpeg</span></figcaption></figure>
+            <p><strong>1.1.4 选择包房</strong>：点击对应房间名称。</p>
+            <figure class="img-figure"><img src="media/image5.jpeg" alt="图1-4 包房选择" loading="lazy"><figcaption>图1-4 包房选择 <span class="file-hint">media/image5.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image6.png" alt="图1-5 房间分布图" loading="lazy"><figcaption>图1-5 房间分布图 <span class="file-hint">media/image6.png</span></figcaption></figure>
+            <p><strong>1.1.5 点菜</strong>：点击搜索键。</p>
+            <figure class="img-figure"><img src="media/image7.jpeg" alt="图1-6 点菜界面" loading="lazy"><figcaption>图1-6 点菜界面 <span class="file-hint">media/image7.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image8.jpeg" alt="图1-7 搜索菜品(宫保猪肝)" loading="lazy"><figcaption>图1-7 搜索菜品(宫保猪肝) <span class="file-hint">media/image8.jpeg</span></figcaption></figure>
+            <p><strong>1.1.6 下单与送单</strong></p>
+            <figure class="img-figure"><img src="media/image9.jpeg" alt="图1-8 下单" loading="lazy"><figcaption>图1-8 下单 <span class="file-hint">media/image9.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image10.jpeg" alt="图1-9 送单小票" loading="lazy"><figcaption>图1-9 送单小票 <span class="file-hint">media/image10.jpeg</span></figcaption></figure>
+            <p><strong>1.1.7 结账</strong></p>
+            <figure class="img-figure"><img src="media/image11.jpeg" alt="图1-10 结账" loading="lazy"><figcaption>图1-10 结账 <span class="file-hint">media/image11.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image12.jpeg" alt="图1-11 结账确认" loading="lazy"><figcaption>图1-11 结账确认 <span class="file-hint">media/image12.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image13.jpeg" alt="图1-12 结账完成" loading="lazy"><figcaption>图1-12 结账完成 <span class="file-hint">media/image13.jpeg</span></figcaption></figure>
+
+            <h4 id="fapiao">1.2 发票管理</h4>
+            <figure class="img-figure"><img src="media/image14.jpeg" alt="图2-1 电子税务局APP" loading="lazy"><figcaption>图2-1 电子税务局APP <span class="file-hint">media/image14.jpeg</span></figcaption></figure>
+            <p><strong>1.2.1 发票开具</strong> 账号15585894446 密码Zxl8933031</p>
+            <figure class="img-figure"><img src="media/image15.png" alt="图2-2 登录信息" loading="lazy"><figcaption>图2-2 登录信息 <span class="file-hint">media/image15.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image16.png" alt="图2-3 填写抬头/项目" loading="lazy"><figcaption>图2-3 填写抬头/项目 <span class="file-hint">media/image16.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image17.png" alt="图2-4 输入金额" loading="lazy"><figcaption>图2-4 输入金额 <span class="file-hint">media/image17.png</span></figcaption></figure>
+            <p><strong>1.2.2 发票发送</strong></p>
+            <figure class="img-figure"><img src="media/image18.png" alt="图2-5 微信选取文件" loading="lazy"><figcaption>图2-5 微信选取文件 <span class="file-hint">media/image18.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image19.png" alt="图2-6 gt4app文件夹" loading="lazy"><figcaption>图2-6 gt4app文件夹 <span class="file-hint">media/image19.png</span></figcaption></figure>
+            <p><strong>1.2.3 发票作废（红冲）</strong></p>
+            <figure class="img-figure"><img src="media/image20.png" alt="图2-7 红字发票录入" loading="lazy"><figcaption>图2-7 红字发票录入 <span class="file-hint">media/image20.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image21.jpeg" alt="图2-8 选择作废发票" loading="lazy"><figcaption>图2-8 选择作废发票 <span class="file-hint">media/image21.jpeg</span></figcaption></figure>
+
+            <h4 id="dayinji">1.3 打印机</h4>
+            <p>略</p>
+            <h4 id="jiankong">1.4 监控系统</h4>
+            <p>历史密码：a147258369 / jzlnjl13579</p>
+
+            <h3 id="caiwu">2. 财务管理</h3>
+            <h4 id="zhichu">2.2 支出统计</h4>
+            <figure class="img-figure"><img src="media/image22.png" alt="图0-21 支出统计示例" loading="lazy"><figcaption>图0-21 支出统计示例 <span class="file-hint">media/image22.png</span></figcaption></figure>
+            <h4 id="jibao">2.3 季度财报</h4>
+            <figure class="img-figure"><img src="media/image23.png" alt="图0-22 季度财报示例" loading="lazy"><figcaption>图0-22 季度财报示例 <span class="file-hint">media/image23.png</span></figcaption></figure>
+            <p>电费户号:0602052500368533 水费户号:80130330</p>
+
+            <h3 id="wuliao">5. 物料使用与存放</h3>
+            <h4 id="qingjie">5.1 清洁剂使用</h4>
+            <figure class="img-figure"><img src="media/image24.jpeg" alt="图0-23 地板清洁" loading="lazy"><figcaption>图0-23 地板清洁 <span class="file-hint">media/image24.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image25.jpeg" alt="图0-24 化油剂" loading="lazy"><figcaption>图0-24 化油剂 <span class="file-hint">media/image25.jpeg</span></figcaption></figure>
+
+            <h2 id="zhusu">第二部分：住宿部</h2>
+            <h3 id="fangka">1. 房卡管理</h3>
+            <figure class="img-figure"><img src="media/image26.png" alt="图0-1 翔羽云盾登录" loading="lazy"><figcaption>图0-1 翔羽云盾登录 <span class="file-hint">media/image26.png</span></figcaption></figure>
+            <h4 id="qiantai-fk">1.2 前台接待发卡</h4>
+            <figure class="img-figure"><img src="media/微信图片_20251105154236_6_21.jpeg" alt="表0-1 房卡" loading="lazy"><figcaption>表0-1 房卡 <span class="file-hint">media/微信图片_20251105154236_6_21.jpeg</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image29.png" alt="图0-2 发卡界面" loading="lazy"><figcaption>图0-2 发卡界面 <span class="file-hint">media/image29.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image30.png" alt="图0-3 日期选择" loading="lazy"><figcaption>图0-3 日期选择 <span class="file-hint">media/image30.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image31.png" alt="图0-4 发卡确认" loading="lazy"><figcaption>图0-4 发卡确认 <span class="file-hint">media/image31.png</span></figcaption></figure>
+            <h4 id="menyaoshi">1.5 门锁钥匙及应急处理</h4>
+            <figure class="img-figure"><img src="media/image32.png" alt="图0-5 钥匙位置" loading="lazy"><figcaption>图0-5 钥匙位置 <span class="file-hint">media/image32.png</span></figcaption></figure>
+
+            <h3 id="shenfen">2. 身份信息登记</h3>
+            <figure class="img-figure"><img src="media/image33.png" alt="图0-6 浏览器图标" loading="lazy"><figcaption>图0-6 浏览器图标 <span class="file-hint">media/image33.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image34.png" alt="图0-7 旅馆业信息系统页面" loading="lazy"><figcaption>图0-7 旅馆业信息系统页面 <span class="file-hint">media/image34.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image35.png" alt="图0-8 IE模式设置" loading="lazy"><figcaption>图0-8 IE模式设置 <span class="file-hint">media/image35.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image36.png" alt="图0-9 登录页" loading="lazy"><figcaption>图0-9 登录页 <span class="file-hint">media/image36.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image37.png" alt="图0-10 主页" loading="lazy"><figcaption>图0-10 主页 <span class="file-hint">media/image37.png</span></figcaption></figure>
+            <figure class="img-figure"><img src="media/image38.jpeg" alt="图0-11 登记界面" loading="lazy"><figcaption>图0-11 登记界面 <span class="file-hint">media/image38.jpeg</span></figcaption></figure>
+
+            <h3 id="wangluo">3. 网络平台管理</h3>
+            <figure class="img-figure"><img src="media/image39.png" alt="图0-12 飞猪后台" loading="lazy"><figcaption>图0-12 飞猪后台 <span class="file-hint">media/image39.png</span></figcaption></figure>
+            <p>携程、美团、飞猪账号密码已保留。</p>
+
+            <h3 id="bucao">4. 布草和物料</h3>
+            <figure class="img-figure"><img src="media/image40.png" alt="平面示意图" loading="lazy"><figcaption>平面示意图 <span class="file-hint">media/image40.png</span></figcaption></figure>
+            <p>布草间二楼，规格1.5m/1.2m</p>
+            <h3 id="pingmian">5. 平面示意图</h3>
+            <figure class="img-figure"><img src="media/image40.png" alt="平面示意图" loading="lazy"><figcaption>平面示意图 <span class="file-hint">media/image40.png</span></figcaption></figure>
+            <hr>
+            <p style="color:#2c6a8c;">—— 细则结束，请将图片放在 media/ 目录下 ——</p>
+        `;
+
+        // ---------- DOM 元素 ----------
+        const mainContent = document.getElementById('mainContent');
+        const editRequestBtn = document.getElementById('editRequestBtn');
+        const saveExitBtn = document.getElementById('saveExitBtn');
+        const resetDefaultBtn = document.getElementById('resetDefaultBtn');
+        const editModeIndicator = document.getElementById('editModeIndicator');
+        const securityQuickPanel = document.getElementById('securityQuickPanel');
+        const securitySettingsBtn = document.getElementById('securitySettingsBtn');
+        const changePwdBtn = document.getElementById('changePwdBtn');
+        const forgotPwdBtn = document.getElementById('forgotPwdBtn');
+        const closeSecurityPanel = document.getElementById('closeSecurityPanel');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+
+        let isEditMode = false;
+
+        function loadContent() {
+            const saved = localStorage.getItem(STORAGE_CONTENT);
+            mainContent.innerHTML = saved || DEFAULT_CONTENT_HTML;
+        }
+        loadContent();
+
+        function setEditMode(mode) {
+            isEditMode = mode;
+            if (mode) {
+                mainContent.setAttribute('contenteditable', 'true');
+                editModeIndicator.textContent = '✏️ 编辑模式(直接修改)';
+                editModeIndicator.style.display = 'inline-block';
+                editRequestBtn.style.display = 'none';
+                saveExitBtn.style.display = 'inline-block';
+                resetDefaultBtn.style.display = 'inline-block';
+            } else {
+                mainContent.removeAttribute('contenteditable');
+                editModeIndicator.textContent = '🔒 浏览模式';
+                editModeIndicator.style.display = 'inline-block';
+                editRequestBtn.style.display = 'inline-block';
+                saveExitBtn.style.display = 'none';
+                resetDefaultBtn.style.display = 'none';
+                localStorage.setItem(STORAGE_CONTENT, mainContent.innerHTML);
+            }
+        }
+
+        function checkPassword(inputPwd) {
+            const storedPwd = localStorage.getItem(STORAGE_PASSWORD) || DEFAULT_PASSWORD;
+            return inputPwd === storedPwd;
+        }
+
+        function showModal(html) {
+            modalContent.innerHTML = html;
+            modalOverlay.classList.remove('hidden');
+        }
+        function hideModal() { modalOverlay.classList.add('hidden'); }
+
+        editRequestBtn.addEventListener('click', () => {
+            securityQuickPanel.classList.remove('hidden');
+        });
+
+        closeSecurityPanel.addEventListener('click', () => {
+            securityQuickPanel.classList.add('hidden');
+        });
+
+        changePwdBtn.addEventListener('click', () => {
+            showModal(`
+                <h3>🔑 修改密码</h3>
+                <div class="input-group"><label>当前密码</label><input type="password" id="oldPwd" placeholder="输入当前密码"></div>
+                <div class="input-group"><label>新密码</label><input type="password" id="newPwd" placeholder="新密码"></div>
+                <div class="input-group"><label>确认新密码</label><input type="password" id="confirmPwd" placeholder="再次输入"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="cancelModal">取消</button>
+                    <button class="btn btn-primary" id="submitChangePwd">确认修改</button>
+                </div>
+            `);
+            document.getElementById('cancelModal').addEventListener('click', hideModal);
+            document.getElementById('submitChangePwd').addEventListener('click', () => {
+                const old = document.getElementById('oldPwd').value;
+                const newP = document.getElementById('newPwd').value;
+                const confirm = document.getElementById('confirmPwd').value;
+                if (!checkPassword(old)) { alert('当前密码错误'); return; }
+                if (newP !== confirm) { alert('两次新密码不一致'); return; }
+                localStorage.setItem(STORAGE_PASSWORD, newP);
+                alert('密码修改成功');
+                hideModal();
+            });
+        });
+
+        forgotPwdBtn.addEventListener('click', () => {
+            const question = localStorage.getItem(STORAGE_QUESTION);
+            if (!question) {
+                if (confirm('未设置密保问题，是否重置为默认密码？')) {
+                    localStorage.setItem(STORAGE_PASSWORD, DEFAULT_PASSWORD);
+                    alert('密码已重置为默认: ' + DEFAULT_PASSWORD);
+                }
+                return;
+            }
+            showModal(`
+                <h3>❓ 密保验证</h3>
+                <div class="input-group"><label>${question}</label><input type="text" id="securityAnswer" placeholder="输入答案"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="cancelModal">取消</button>
+                    <button class="btn btn-primary" id="submitAnswer">验证</button>
+                </div>
+            `);
+            document.getElementById('cancelModal').addEventListener('click', hideModal);
+            document.getElementById('submitAnswer').addEventListener('click', () => {
+                const ans = document.getElementById('securityAnswer').value.trim();
+                const storedAns = localStorage.getItem(STORAGE_ANSWER) || '';
+                if (ans.toLowerCase() === storedAns.toLowerCase()) {
+                    showModal(`
+                        <h3>🔐 重置密码</h3>
+                        <div class="input-group"><label>新密码</label><input type="password" id="newPwdReset" placeholder="输入新密码"></div>
+                        <div class="input-group"><label>确认新密码</label><input type="password" id="confirmPwdReset" placeholder="再次输入"></div>
+                        <div class="modal-actions">
+                            <button class="btn btn-outline" id="cancelModal">取消</button>
+                            <button class="btn btn-primary" id="submitReset">确认重置</button>
+                        </div>
+                    `);
+                    document.getElementById('cancelModal').addEventListener('click', hideModal);
+                    document.getElementById('submitReset').addEventListener('click', () => {
+                        const np = document.getElementById('newPwdReset').value;
+                        const cp = document.getElementById('confirmPwdReset').value;
+                        if (np !== cp) { alert('两次密码不一致'); return; }
+                        localStorage.setItem(STORAGE_PASSWORD, np);
+                        alert('密码已重置');
+                        hideModal();
+                    });
+                } else {
+                    alert('答案错误');
+                }
+            });
+        });
+
+        securitySettingsBtn.addEventListener('click', () => {
+            const currentQ = localStorage.getItem(STORAGE_QUESTION) || '';
+            showModal(`
+                <h3>⚙️ 密保设置</h3>
+                <div class="input-group"><label>密保问题</label><input type="text" id="secQuestion" value="${currentQ.replace(/"/g, '&quot;')}" placeholder="例如：我的宠物名字"></div>
+                <div class="input-group"><label>密保答案</label><input type="text" id="secAnswer" placeholder="输入答案（不区分大小写）"></div>
+                <p style="color:#a67b3c;">留空则清除密保</p>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="cancelModal">取消</button>
+                    <button class="btn btn-primary" id="saveSec">保存密保</button>
+                </div>
+            `);
+            document.getElementById('cancelModal').addEventListener('click', hideModal);
+            document.getElementById('saveSec').addEventListener('click', () => {
+                const q = document.getElementById('secQuestion').value.trim();
+                const a = document.getElementById('secAnswer').value.trim();
+                if (q === '' || a === '') {
+                    localStorage.removeItem(STORAGE_QUESTION);
+                    localStorage.removeItem(STORAGE_ANSWER);
+                    alert('密保已清除');
+                } else {
+                    localStorage.setItem(STORAGE_QUESTION, q);
+                    localStorage.setItem(STORAGE_ANSWER, a);
+                    alert('密保设置成功');
+                }
+                hideModal();
+            });
+        });
+
+        window.submitPasswordAttempt = () => {
+            const pwd = prompt('请输入编辑密码');
+            if (pwd && checkPassword(pwd)) {
+                setEditMode(true);
+                securityQuickPanel.classList.add('hidden');
+            } else {
+                alert('密码错误');
+            }
+        };
+        editRequestBtn.addEventListener('click', () => {
+            window.submitPasswordAttempt();
+        });
+
+        saveExitBtn.addEventListener('click', () => setEditMode(false));
+
+        resetDefaultBtn.addEventListener('click', () => {
+            if (confirm('恢复默认会丢失所有编辑内容，确定？')) {
+                mainContent.innerHTML = DEFAULT_CONTENT_HTML;
+                if (!isEditMode) localStorage.setItem(STORAGE_CONTENT, DEFAULT_CONTENT_HTML);
+            }
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) hideModal();
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (isEditMode) {
+                e.preventDefault();
+                e.returnValue = '编辑尚未保存';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 's' && isEditMode) {
+                e.preventDefault();
+                setEditMode(false);
+                alert('已保存并退出');
+            }
+        });
+    })();
+</script>
+</body>
+</html>
